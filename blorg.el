@@ -808,24 +808,24 @@ Each element of the list is a cons: (\"tag-name\" . number)."
   (let (alltags)
     (save-excursion
       (goto-char (point-min))
-      (while (and (re-search-forward ":\\([0-9A-Za-z@_]+\\):" nil t)
-		  (blorg-check-done))
+      (while (re-search-forward ":\\([0-9A-Za-z@_]+\\):" nil t)
+		  (when (blorg-check-done)
 	(unless (assoc (match-string-no-properties 1) alltags)
 	  (let ((cnt 0))
 	    (save-excursion
 	      (goto-char (point-min))
-	      (while (and (re-search-forward
+	      (while (re-search-forward
 			   (concat ":\\("
 				   (regexp-quote
 				    (match-string-no-properties 1))
 				   "\\):") nil t)
-			  (blorg-check-done))
-		(setq cnt (1+ cnt))))
+			  (when (blorg-check-done)
+		(setq cnt (1+ cnt)))))
 	    (setq alltags
 		  (add-to-list
 		   'alltags
 		   (cons (match-string-no-properties 1)
-			 cnt)))))
+			 cnt))))))
 	(backward-char 1)))
     (blorg-sort-tags alltags blorg-tags-sort)))
 
