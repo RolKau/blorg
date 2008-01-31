@@ -1059,14 +1059,14 @@ NEW-TITLE is the new title.  Er."
   (let* ((blorgv-post-title (plist-get post :post-title))
 	 (blorgv-published (if (equal blorgv-feed-type "atom")
 			    (blorg-timestamp-to-rfc3339
-			     (plist-get post :post-updated))
-			  (blorg-timestamp-to-rfc822
-			   (plist-get post :post-updated))))
-	 (blorgv-updated (if (equal blorgv-feed-type "atom")
-			      (blorg-timestamp-to-rfc3339
-			       (plist-get post :post-closed))
+			     (plist-get post :post-closed))
 			  (blorg-timestamp-to-rfc822
 			   (plist-get post :post-closed))))
+	 (blorgv-updated (if (equal blorgv-feed-type "atom")
+			      (blorg-timestamp-to-rfc3339
+			       (plist-get post :post-updated))
+			  (blorg-timestamp-to-rfc822
+			   (plist-get post :post-updated))))
 	 (blorgv-content (plist-get post :post-content))
 	 (blorgv-post-rel-url (blorg-make-post-url blorgv-post-title))
 	 (post-number (plist-get post :post-number)))
@@ -1087,7 +1087,7 @@ NEW-TITLE is the new title.  Er."
 			   (blorg-render-post-content-html blorgv-content)
 			 (blorg-render-post-content-txt blorgv-content))
       "      </description>
-      <pubDate>" blorgv-modified-rfc822 "</pubDate>
+      <pubDate>" blorgv-published "</pubDate>
       <guid>" (concat blorgv-blog-url blorgv-post-rel-url) "</guid>
     </item>\n"))
 
