@@ -1785,9 +1785,11 @@ blorgv-language "\" lang=\"" blorgv-language"\">
 		   (while (re-search-forward "^[ \t]*\\(|.+\\)$" end-search t)
 		     (add-to-list 'table (match-string-no-properties 1) t)
 		     (replace-match ""))
-		   (insert (org-format-org-table-html table))))
-		;; fixed-with text
-		((looking-at ":")
+		   (insert (org-format-org-table-html table))))))
+	 ;; fixed-width text
+	 ;; convert quotes
+	 ((eq 'org-code prop)
+	  (when (looking-at ":")
 		 (insert "<pre>\n")
 		 (let ((end-search
 			(save-excursion
@@ -1802,7 +1804,7 @@ blorgv-language "\" lang=\"" blorgv-language"\">
 				     (insert "\n</pre>\n")
 				     (point-max)))))))
 		   (while (re-search-forward "^[ \t]*:\\(.+\\)$" end-search t)
-		     (replace-match "\\1"))))))
+		     (replace-match "\\1")))))
 	 ;; convert comments
 	 ((or (eq 'font-lock-comment-face prop)
 	      (eq 'org-formula prop)
