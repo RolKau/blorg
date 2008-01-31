@@ -1113,7 +1113,7 @@ NEW-TITLE is the new title.  Er."
     blorgv-language "\" xml:base=\"" blorgv-blog-url "\">
     <div xmlns=\"http://www.w3.org/1999/xhtml\">\n"
   (blorg-render-post-content-html
-   blorgv-content t blorgv-post-rel-url)
+   blorgv-content t blorgv-post-title)
   "    </div>
   </content>")
       (insert "
@@ -1121,7 +1121,7 @@ NEW-TITLE is the new title.  Er."
     blorgv-language "\" xml:base=\"" blorgv-blog-url "\">
     <div xmlns=\"http://www.w3.org/1999/xhtml\">\n"
   (blorg-render-post-content-html
-   blorgv-content nil blorgv-post-rel-url)
+   blorgv-content nil blorgv-post-title)
   "    </div>
   </summary>"))
     (insert "\n</entry>\n\n"))
