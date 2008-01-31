@@ -1859,18 +1859,20 @@ blorgv-language "\" lang=\"" blorgv-language"\">
 			   image-file-name-extensions)
 			  raw-link-ext))
 	  (progn
-	    (eshell/cp raw-link
-		       (concat blorgv-publish-d
-			       blorgv-images-d
-			       raw-rel-link))
+		(save-match-data
+		  (eshell/cp raw-link
+					 (concat blorgv-publish-d
+							 blorgv-images-d
+							 raw-rel-link)))
 	    (replace-match (concat "<img alt=\"" desc
 				   "\" src=\"" blorgv-images-d
 				   raw-rel-link "\"/>")))
 	(progn
-	  (eshell/cp raw-link
-		     (concat blorgv-publish-d
-			     blorgv-upload-d
-			     raw-rel-link))
+	  (save-match-data
+		(eshell/cp raw-link
+				   (concat blorgv-publish-d
+						   blorgv-upload-d
+						   raw-rel-link)))
 	  (replace-match (concat "<a href=\""
 				 blorgv-upload-d
 				 raw-rel-link "\">"
