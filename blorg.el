@@ -893,8 +893,8 @@ Maybe parse ALL posts."
 			      (save-excursion
 				(re-search-forward "^\\* " nil t)) t))
 			   (match-string-no-properties 1))
-			 (format-time-string (car blorgv-time-stamp-formats)))
-		     "\\([0-9]+\\)-\\([0-9]+\\)-\\([0-9]+\\)"))
+			 (format-time-string (cdr blorgv-time-stamp-formats)))
+		     "\\([0-9]+\\)-\\([0-9]+\\)-\\([0-9]+\\) \\(.*?\\) \\([0-9]+\\):\\([0-9]+\\)"))
 	       (post-exists 
 		(file-exists-p (concat blorgv-publish-d 
 				       (blorg-make-post-url ttle)))))
