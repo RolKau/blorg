@@ -378,17 +378,41 @@ Allowed symbols are: index tag."
 (defcustom blorg-index-template
   "
 <body>
-<div id=\"content\">
+  <div id=\"content\">
+	<div id=\"blog-title\">
+	  <h1><a href=\"(blorg-insert-index-url)\">(blorg-insert-page-title)</a></h1>
+	</div>
 
-<div id=\"blog-title\">
-  <h1><a href=\"(blorg-insert-index-url)\">(blorg-insert-page-title)</a></h1>
-</div>
+	<div id=\"sidemenu\">
+	  <div id=\"blog-author\">
+		<h3>(blorg-insert-author)</h3>
+		<ul>
+		  <li><a href=\"(blorg-insert-mailto-email)\">email</a></li>
+		</ul>
+	  </div>
 
-<div id=\"blog-author\">
-  <h3><a href=\"(blorg-insert-mailto-email)\">(blorg-insert-author)</a></h3>
-</div>\n\n(blorg-insert-previous-posts)\n(blorg-insert-tags-as-cloud)\n(blorg-insert-archives)\n(blorg-insert-content)\n
-</div>
-</body>"
+	  <div id=\"tags\">
+		<h3>Tags</h3>
+		(blorg-insert-tags-as-cloud)
+	  </div>
+
+	  <div>
+		<h3>Archive</h3>
+		(blorg-insert-archives)
+	  </div>
+	</div>
+
+	<div id=\"rightmenu\">
+	  <h3>Older posts</h3>
+	  (blorg-insert-previous-posts)
+	</div>
+
+	<div id=\"main\">
+	  (blorg-insert-content)
+	</div>
+  </div>
+</body>
+"
   "Template of the index page.
 
 Here is the list of defuns that you can insert in this template:
@@ -411,17 +435,41 @@ Here is the list of defuns that you can insert in this template:
 (defcustom blorg-tag-page-template
   "
 <body>
-<div id=\"content\">
+  <div id=\"content\">
+	<div id=\"blog-title\">
+	  <h1><a href=\"(blorg-insert-index-url)\">(blorg-insert-page-title)</a></h1>
+	</div>
 
-<div id=\"blog-title\">
-  <h1><a href=\"(blorg-insert-index-url)\">(blorg-insert-page-title) - (blorg-insert-tag-name)</a></h1>
-</div>
+	<div id=\"sidemenu\">
+	  <div id=\"blog-author\">
+		<h3>(blorg-insert-author)</h3>
+		<ul>
+		  <li><a href=\"(blorg-insert-mailto-email)\">email</a></li>
+		</ul>
+	  </div>
 
-<div id=\"blog-author\">
-  <h3><a href=\"(blorg-insert-mailto-email)\">(blorg-insert-author)</a></h3>
-</div>\n\n(blorg-insert-previous-posts)\n(blorg-insert-tags-as-cloud)\n(blorg-insert-archives)\n(blorg-insert-content)\n
-</div>
-</body>"
+	  <div id=\"tags\">
+		<h3>Tags</h3>
+		(blorg-insert-tags-as-cloud)
+	  </div>
+
+	  <div>
+		<h3>Archive</h3>
+		(blorg-insert-archives)
+	  </div>
+	</div>
+
+	<div id=\"rightmenu\">
+	  <h3>Older posts</h3>
+	  (blorg-insert-previous-posts)
+	</div>
+
+	<div id=\"main\">
+	  (blorg-insert-content)
+	</div>
+  </div>
+</body>
+"
   "Template for the tag pages.
 
 Here is the list of defuns that you can insert in this template:
@@ -444,17 +492,41 @@ Here is the list of defuns that you can insert in this template:
 (defcustom blorg-month-page-template
   "
 <body>
-<div id=\"content\">
+  <div id=\"content\">
+	<div id=\"blog-title\">
+	  <h1><a href=\"(blorg-insert-index-url)\">(blorg-insert-page-title)</a></h1>
+	</div>
 
-<div id=\"blog-title\">
-  <h1><a href=\"(blorg-insert-index-url)\">(blorg-insert-page-title) - (blorg-insert-month-name)</a></h1>
-</div>
+	<div id=\"sidemenu\">
+	  <div id=\"blog-author\">
+		<h3>(blorg-insert-author)</h3>
+		<ul>
+		  <li><a href=\"(blorg-insert-mailto-email)\">email</a></li>
+		</ul>
+	  </div>
 
-<div id=\"blog-author\">
-  <h3><a href=\"(blorg-insert-mailto-email)\">(blorg-insert-author)</a></h3>
-</div>\n\n(blorg-insert-tags-as-cloud)\n(blorg-insert-previous-posts)\n(blorg-insert-archives)\n(blorg-insert-content)\n
-</div>
-</body>"
+	  <div id=\"tags\">
+		<h3>Tags</h3>
+		(blorg-insert-tags-as-cloud)
+	  </div>
+
+	  <div>
+		<h3>Archive</h3>
+		(blorg-insert-archives)
+	  </div>
+	</div>
+
+	<div id=\"rightmenu\">
+	  <h3>Older posts</h3>
+	  (blorg-insert-previous-posts)
+	</div>
+
+	<div id=\"main\">
+	  (blorg-insert-content)
+	</div>
+  </div>
+</body>
+"
   "Template for the month pages.
 
 Here is the list of defuns that you can insert in this template:
@@ -477,17 +549,16 @@ Here is the list of defuns that you can insert in this template:
 (defcustom blorg-post-page-template
   "
 <body>
-<div id=\"content\">
+  <div id=\"content\">
 
-<div id=\"blog-title\">
-  <h1><a href=\"(blorg-insert-index-url)\">(blorg-insert-page-title)</a></h1>
-</div>
+	<div id=\"blog-title\">
+	  <h1><a href=\"(blorg-insert-index-url)\">(blorg-insert-page-title)</a></h1>
+	</div>
 
-<div id=\"blog-author\">
-  <h3><a href=\"(blorg-insert-mailto-email)\">(blorg-insert-author)</a></h3>
-</div>\n\n(blorg-insert-content)\n
-</div>
-</body>"
+	(blorg-insert-content)
+  </div>
+</body>
+"
   "Template for the post pages.
 
 Here is the list of defuns that you can insert in this template:
@@ -511,19 +582,19 @@ Here is the list of defuns that you can insert in this template:
   "
 <div class=\"post\">
 
-<div class=\"post-title\">
-  <h2><a href=\"(blorg-insert-post-url)\">(blorg-insert-post-title)</a></h2>
-</div>
+  <div class=\"post-title\">
+	<h2><a href=\"(blorg-insert-post-url)\">(blorg-insert-post-title)</a></h2>
+  </div>
 
-<div class=\"post-infos\">
- (blorg-insert-post-author)
- (blorg-insert-post-dates)
- (blorg-insert-post-tags)
-</div>
+  <div class=\"post-infos\">
+	(blorg-insert-post-author)
+	(blorg-insert-post-dates);
+	(blorg-insert-post-tags)
+  </div>
 
-<div class=\"post-content\">
- (blorg-insert-post-content)
-</div>
+  <div class=\"post-content\">
+	(blorg-insert-post-content)
+  </div>
 
 </div>
 "
@@ -542,24 +613,28 @@ Here is the list of defuns that you can insert in this template:
   :group 'blorg-templates-for-posts)
 
 (defcustom blorg-post-author-template
-   " <p class=\"author\">Author: <a href=\"(blorg-insert-mailto-email)\">(blorg-insert-author)</a></p>"
+  "
+<p class=\"author\">By <a href=\"(blorg-insert-mailto-email)\">(blorg-insert-author)</a></p>
+"
    "Template for the (blorg-insert-post-author) defun."
    :type 'string
    :group 'blorg-templates-for-posts)
 
 (defcustom blorg-post-dates-template
-   " <p class=\"date\">(blorg-insert-post-publication-date)</p>"
-;;   <p class=\"updated\">Updated: (blorg-insert-post-modification-date)</p>
-   "Template for the (blorg-insert-post-dates) defun."
-   :type 'string
-   :group 'blorg-templates-for-posts)
+  "
+<span class=\"date\">(blorg-insert-post-publication-date)</span>
+"
+  "Template for the (blorg-insert-post-dates) defun."
+  :type 'string
+  :group 'blorg-templates-for-posts)
 
 (defcustom blorg-post-tags-template
-   " <p class=\"tags\">Tags: (blorg-insert-this-post-tags)</p>"
-;;   <p class=\"technorati\">Technorati: (blorg-insert-this-post-tags-to-technorati)</p>"
-   "Template for the (blorg-insert-post-tags) defun."
-   :type 'string
-   :group 'blorg-templates-for-posts)
+  "
+<span class=\"tags\">Tags: (blorg-insert-this-post-tags)</span>
+"
+  "Template for the (blorg-insert-post-tags) defun."
+  :type 'string
+  :group 'blorg-templates-for-posts)
 
 
 (defcustom blorg-put-full-post
