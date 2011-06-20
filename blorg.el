@@ -1049,7 +1049,7 @@ NEW-TITLE is the new title.  Er."
     <description>" blorgv-subtitle "</description>
     <pubDate>" blorgv-created-rfc822 "</pubDate>
     <lastBuildDate>" blorgv-modified-rfc822 "</lastBuildDate>
-    <copyright> (c)" (concat blorgv-author (format-time-string "%Y")) "</copyright>
+    <copyright>(c) " (concat (format-time-string "%Y") " " blorgv-author) "</copyright>
     <docs>" blorgv-blog-url "</docs>
     <generator>blorg version " blorg-version "</generator>\n"))
 
