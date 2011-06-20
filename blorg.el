@@ -1512,6 +1512,32 @@ blorgv-language "\" lang=\"" blorgv-language"\">
 	   (t (concat "<a href=\"" (blorg-make-post-url tag) 
 		      "\">" tag "</a>")))) tags " "))
 
+;; interleave the ASCII code for a character with some insignificant markup
+(defun char-to-markup (ch)
+  "Obfuscated HTML fragment for a character"
+  (format "<span style=\"display:none\"/>&#x%x;<span style=\"display:none\"/>" (string-to-char ch)))
+
+;; create script to insert a certain character in a string
+(defun char-to-script (ch)
+  "Obfuscated JavaScript fragment for a character"
+  (format "'+String.fromCharCode(%2d)+'" (string-to-char ch)))
+
+;; wrap a simple string into an expression to force evaluation
+(defun string-to-expr (str)
+  "JavaScript expression that always evaluate to string"
+  (concat "'+(1?'" str "':0)+'"))
+
+;; use a script to generate the mailto: link dynamically
+(defun mailto-script (addr)
+  "Obfuscated mailto: link"
+  (let* ((dot-in-script (mapconcat 'string-to-expr
+								   (split-string addr  "[.]")
+								   (char-to-script ".")))
+		 (email-script  (mapconcat 'string-to-expr
+								   (split-string dot-in-script "[@]")
+								   (char-to-script "@")))
+		 (mailto-link   (concat "'mai'+'lto" (char-to-script ":") email-script "'")))
+	(concat "javascript:window.location=" mailto-link ";void(0)")))
 
 ;;; Macros
 (defmacro blorg-insert-index-url nil
@@ -1531,9 +1557,10 @@ blorgv-language "\" lang=\"" blorgv-language"\">
   "Insert blorgv-email."
   `(insert blorgv-email))
 
+;; replace all dots and at signs in the email address with markup
 (defmacro blorg-insert-mailto-email nil
-  "Insert mailto:email."
-  `(insert "mailto:" blorgv-email))
+  "Insert email"
+  `(insert (mailto-script blorgv-email)))
 
 (defmacro blorg-insert-homepage nil
   "Insert blorgv-homepage."
