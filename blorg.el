@@ -1084,7 +1084,7 @@ NEW-TITLE is the new title.  Er."
       <title>" (blorg-escape blorgv-post-title 'entity) "</title>
       <link>" (concat blorgv-blog-url blorgv-post-rel-url) "</link>
       <description>\n" (if (eq blorg-rss-content-format 'html)
-			   (blorg-render-post-content-html blorgv-content)
+			   (blorg-render-post-content-html blorgv-content nil blorgv-post-title)
 			 (blorg-render-post-content-txt blorgv-content))
       "      </description>
       <pubDate>" blorgv-published "</pubDate>
@@ -1666,168 +1666,6 @@ blorgv-language "\" lang=\"" blorgv-language"\">
 		      blorg-post-tags-template)))))
 
 ;;; Exporting to HTML
-(defun blorg-convert-parg nil
-  "Convert paragraphs."
-  (save-excursion
-    (goto-char (point-min))
-    (while (re-search-forward "^[^ \n\r]+" nil t)
-      ;; Don't quote images/headings/quotes
-      (unless (save-match-data
-		(string-match "<[quod/lih]" (match-string 0)))
-	(goto-char (match-beginning 0))
-	(insert "\n<p>\n")
-	(re-search-forward "^$" nil t)
-	(insert "</p>\n")))))
-
-
-(defun blorg-convert-ul nil
-  "Convert unordered list environments inside a post."
-  (save-excursion
-    (goto-char (point-min))
-    (while (re-search-forward "^- " nil t)
-      (replace-match "<ul>\n<li>")
-      (forward-line)
-      (let ((inside-list t))
-	(while inside-list
-	  (cond ((looking-at "  [^ ]\\|\n")
-		 (forward-line))
-		((looking-at "- ")
- 		 (replace-match "</li>\n<li>")
- 		 (forward-line))
-		(t (skip-chars-backward "\n")
-		   (insert "</li>\n</ul>")
-		   (setq inside-list nil))))))))
-
-
-(defun blorg-convert-dl nil
-  "Convert description list environments inside a post."
-  (save-excursion
-    (goto-char (point-min))
-    (while (re-search-forward "^- !\\(.+\\):" nil t)
-      (replace-match "<dl>\n<dt>\\1</dt><dd>")
-      (forward-line)
-      (let ((inside-list t))
-	(while inside-list
-	  (cond ((looking-at "  [^ ]\\|\n")
-		 (forward-line))
-		((looking-at "- !\\(.+\\):")
- 		 (replace-match "</dd>\n<dt>\\1</dt><dd>")
- 		 (forward-line))
-		(t (skip-chars-backward "\n")
-		   (insert "</dd>\n</dl>")
-		   (setq inside-list nil))))))))
-
-
-(defun blorg-convert-ol nil
-  "Convert ordered list environments inside a post."
-  (save-excursion
-    (goto-char (point-min))
-    (while (re-search-forward "^[0-9]+\\. " nil t)
-      (replace-match "<ol>\n<li>")
-      (forward-line)
-      (let ((inside-list t))
-	(while inside-list
-	  (cond ((looking-at "   [^ ]\\|\n")
-		 (forward-line))
-		((looking-at "^[0-9]+\\. ")
- 		 (replace-match "</li>\n<li>")
- 		 (forward-line))
-		(t (skip-chars-backward "\n")
-		   (insert "</li>\n</ol>")
-		   (setq inside-list nil))))))))
-
-
-(defun blorg-convert-fontification nil
-  "Convert fontified text in buffer."
-  (save-excursion
-    (goto-char (point-min))
-    (open-line 1)
-    (while (next-single-property-change (point) 'face)
-      (goto-char (next-single-property-change (point) 'face))
-      (let* ((table nil)
-	     (prop (get-text-property (point) 'face)))
-	(cond
-	 ;; convert subheadings
-	 ((and (not (listp prop))
-	       (string-match "org-level-\\([0-9]\\)" (symbol-name prop)))
-	  (let ((level (number-to-string
-			(1+ (string-to-number
-			     (match-string 1 (symbol-name prop)))))))
-	    (when (looking-at "\\*\\*+ \\(.+\\)$")
-	      (replace-match (concat "<h" level ">"
-				     (match-string-no-properties 1)
-				     "</h" level ">")))))
-	 ;; convert fontification
-	 ((and (not (null prop)) (listp prop))
-	  (blorg-convert-emphasis))
-	 ;; convert links
-	 ((eq 'org-link prop)
-	  (cond ((looking-at org-plain-link-re)
-		 (blorg-convert-links (match-string 1)
-					(match-string 2)))
-		((looking-at org-angle-link-re)
-		 (blorg-convert-links (match-string 1)
-					(match-string 2)))
-		((looking-at org-bracket-link-analytic-regexp)
-		 (blorg-convert-links (match-string 2)
-					(match-string 3)
-					(match-string 5)))))
-	 ;; convert tables and quotes
-	 ((eq 'org-table prop) ; tables
-	  (cond ((looking-at "\\+-+.+$")
-		 (replace-match ""))
-		((looking-at "|")
-		 (let ((end-search
-			(save-excursion
-			  (save-match-data
-			    (if (re-search-forward "^[ \t]*[^|+]" nil t)
-				(match-beginning 0)
-			      (point-max))))))
-		   (while (re-search-forward "^[ \t]*\\(|.+\\)$" end-search t)
-		     (add-to-list 'table (match-string-no-properties 1) t)
-		     (replace-match ""))
-		   (insert (org-format-org-table-html table))))))
-	 ;; fixed-width text
-	 ;; convert quotes
-	 ((eq 'org-code prop)
-	  (when (looking-at ":")
-		 (insert "<pre>\n")
-		 (let ((end-search
-			(save-excursion
-			  (save-match-data
-			    (if (re-search-forward "^[^:]" nil t)
-				(progn (goto-char (match-end 0))
-				       (skip-chars-backward "\n")
-				       (insert "\n</pre>\n")
-				       (match-beginning 0))
-			      (progn (goto-char (point-max))
-				     (skip-chars-backward "\n")
-				     (insert "\n</pre>\n")
-				     (point-max)))))))
-		   (while (re-search-forward "^[ \t]*:\\(.+\\)$" end-search t)
-		     (replace-match "\\1")))))
-	 ;; convert comments
-	 ((or (eq 'font-lock-comment-face prop)
-	      (eq 'org-formula prop)
-	      (eq 'org-special-keyword prop))
-	  (kill-line)
-	  (backward-char 1)))))))
-
-
-(defun blorg-convert-emphasis nil
-  "Convert emphasis."
-  (save-excursion
-    (insert ? )
-    (backward-char 1)
-    (cond ((looking-at org-emph-re)
-	   (let ((body (match-string-no-properties 4))
-		 (postmatch (match-string-no-properties 5))
-		 (tag-b (nth 2 (assoc (match-string-no-properties 3)
-				      org-emphasis-alist)))
-		 (tag-e (nth 3 (assoc (match-string-no-properties 3)
-				      org-emphasis-alist))))
-	     (replace-match (concat tag-b body tag-e postmatch) t))))))
-
 (defconst blorg-special-html-chars
   '(("&"  . (entity "&amp;"  esccode "%26"))
 	("\"" . (entity "&quot;" esccode "%22"))
@@ -1845,82 +1683,90 @@ blorgv-language "\" lang=\"" blorgv-language"\">
 			  blorg-special-html-chars))
 	text))
 
-(defun blorg-convert-links
-  (url-type raw-link &optional link-desc)
-  "Convert URL-TYPE as a mix of RAW-LINK and LINK-DESC."
-  (let* ((raw-rel-link (file-name-nondirectory raw-link))
-	 (raw-link-ext (file-name-extension raw-link))
-	 (desc (or (blorg-escape link-desc 'entity) raw-rel-link)))
-    (cond
-     ;; files and images
-     ((equal url-type "file")
-      (if (save-match-data
-	    (string-match (regexp-opt
-			   image-file-name-extensions)
-			  raw-link-ext))
-	  (progn
-		(save-match-data
-		  (eshell/cp raw-link
-					 (concat blorgv-publish-d
-							 blorgv-images-d
-							 raw-rel-link)))
-	    (replace-match (concat "<img alt=\"" desc
-				   "\" src=\"" blorgv-images-d
-				   raw-rel-link "\"/>")))
-	(progn
-	  (save-match-data
-		(eshell/cp raw-link
-				   (concat blorgv-publish-d
-						   blorgv-upload-d
-						   raw-rel-link)))
-	  (replace-match (concat "<a href=\""
-				 blorgv-upload-d
-				 raw-rel-link "\">"
-				 desc "</a>")))))
-     ;; other links
-     (t (replace-match (concat "<a href=\""
-			       url-type ":" raw-link
-			       "\">" desc "</a>"))))))
-
+(defun blorg-truncate-org-post (blorgv-post-title)
+  "Truncates the current buffer after the blorg-parg-in-headlines-th paragraph,
+and adds a read-mode link."
+  (goto-char (point-min))
+  (forward-paragraph blorg-parg-in-headlines)
+  (delete-blank-lines)
+  (unless (eq (point) (point-max))
+    (insert "\n[[./"
+            (blorg-make-post-url blorgv-post-title)
+            "]["
+            (plist-get blorg-strings :read-more)
+            "]]"))
+  (delete-region (point) (point-max)))
 
 (defun blorg-render-post-content-html
-  (blorgv-content full &optional blorgv-post-title)
+  (blorgv-content full blorgv-post-title)
   "Render BLORGV-CONTENT of a post.
-When FULL render full blorgv-content, otherwise just insert some headlines.
-You can give a specific BLORGV-POST-TITLE to this post."
+When FULL render full blorgv-content, otherwise just insert some headlines."
   (with-temp-buffer
-    (insert blorgv-content)
-	;; process block section (#+BEGIN_xxx ... #+END_xxx)
-	(org-export-handle-include-files)
-	(org-export-remove-comment-blocks-and-subtrees)
-	(org-export-replace-src-segments-and-examples 'html)
-	(org-export-select-backend-specific-text 'html)
-	;; other markup
-    (goto-char (point-min))
-    (blorg-convert-fontification)
-    (blorg-convert-ol)
-    (blorg-convert-dl)
-    (blorg-convert-ul)
-    (blorg-convert-parg)
-    (delete-blank-lines)
-    (save-excursion
-      (goto-char (point-max))
-      (delete-blank-lines))
-    (if (null full)
-	(concat (buffer-substring
-		 (point-min)
-		 (progn (forward-paragraph
-			 blorg-parg-in-headlines)
-			(point)))
-		(if (eq (match-end 0) (point-max)) ""
-		  (concat "\n\<a class=\"read-more\" href=\""
-			  (blorg-make-post-url
-			    blorgv-post-title)
-			  "\">" 
-			  (plist-get blorg-strings :read-more)
-			  "</a>\n")))
-      (buffer-string))))
+		(let ((out-buf (buffer-name)))
+		  (unwind-protect
+			  (with-temp-buffer
+				(unless (eq major-mode 'org-mode)
+							(org-mode))
+				(insert blorgv-content)
+				(blorg-trim-leading-and-trailing-lines)
+				(blorg-rewrite-local-links)
+				(unless full
+				  (blorg-truncate-org-post blorgv-post-title))
+				(save-excursion
+				  (goto-char (point-min))
+				  (insert "*\n")) ; dummy item for this post
+				;; use externally defined stylesheet, not editor settings
+				(let ((org-export-htmlize-output-type 'css)
+					  (org-export-htmlize-css-font-prefix "code-"))
+				  (org-export-as-html 3 nil nil out-buf t)))))
+		(buffer-string)))
 
+(defun blorg-rewrite-local-links ()
+  ;; inspect each link
+  (save-excursion
+    (goto-char (point-min))
+    (open-line 1)
+    (while (next-single-property-change (point) 'face)
+      (goto-char (next-single-property-change (point) 'face))
+	  (when (equal 'org-link (get-text-property (point) 'face))
+		(when (looking-at org-bracket-link-analytic-regexp)
+		  ;; decompose link
+		  (let ((url-type (match-string 2))
+				(raw-link (match-string 3))
+				(link-desc (match-string 5)))
+			;; local files only
+			(when (equal url-type "file")
+			  ;; image file?
+			  (let* ((raw-rel-link (file-name-nondirectory raw-link))
+					 (raw-link-ext (file-name-extension raw-link))
+					 (sub-d (if (and raw-link-ext
+									 (save-match-data
+									   (string-match (regexp-opt
+													  image-file-name-extensions)
+													 raw-link-ext)))
+								blorgv-images-d
+							  blorgv-upload-d)))
+				;; copy to appropriate directory
+				(save-match-data
+				  (let ((src-f (substring-no-properties raw-link))
+						(dst-f (substring-no-properties (concat blorgv-publish-d
+																sub-d
+																raw-rel-link))))
+					(if (file-readable-p src-f)
+						(if (or (not (file-exists-p dst-f))
+								(file-newer-than-file-p src-f dst-f))
+							(eshell/cp src-f dst-f)))))
+				;; rewrite with link to new directory.
+				(replace-match (concat "[[./" sub-d raw-rel-link
+									   (if link-desc (concat "][" link-desc))
+									   "]]"))))))))))
+
+(defun blorg-trim-leading-and-trailing-lines ()
+  (save-excursion
+	(goto-char (point-min))
+	(delete-blank-lines)
+	(goto-char (point-max))
+	(delete-blank-lines)))
 
 (defun blorg-render-post-content-txt (blorgv-content)
   "Render BLORGV-CONTENT of a post.
@@ -1928,11 +1774,7 @@ When FULL render full blorgv-content, otherwise just insert some headlines.
 You can give a specific BLORGV-POST-TITLE to this post."
   (with-temp-buffer
     (insert blorgv-content)
-    (goto-char (point-min))
-    (delete-blank-lines)
-    (save-excursion
-      (goto-char (point-max))
-      (delete-blank-lines))
+	(blorg-trim-leading-and-trailing-lines)
     (buffer-string)))
 
 
