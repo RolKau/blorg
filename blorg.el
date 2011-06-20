@@ -1954,13 +1954,11 @@ You can give a specific BLORGV-POST-TITLE to this post."
 		  " " (number-to-string end-y))
 	  ;; make urls for months
 	  (concat (number-to-string end-y)
-		  "_" (number-to-string month)
+		  (format "%02d" month)
 		  (plist-get blorg-strings :page-extension))
 	  ;; make "2006-05"-like string
 	  (concat (number-to-string end-y)
-		  "-" (if (< month 10)
-			  (concat "0" (number-to-string month))
-			(number-to-string month)))) t)
+		  "-" (format "%02d" month))) t)
 	(setq end-m (1- end-m))
 	(setq nb-of-m (1- nb-of-m))))
     (delq nil (blorg-check-arch-list arch-list blorgv-content)))))
