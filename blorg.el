@@ -2010,7 +2010,7 @@ Example: Wed, 02 Oct 2002 15:00:00 +0200"
 (defun blorg-timestamp-to-readable (time)
   "Convert an `org-mode' TIMESTAMP to a readable format.
 Example: Sunday, May 07 2006 @ 10:35 +0100"
-  (let ((system-time-locale "C"))
+  (let ((system-time-locale blorgv-language))
     (format-time-string 
      (plist-get blorg-strings :time-format) time nil)))
 
