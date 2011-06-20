@@ -836,10 +836,10 @@ Each element of the list is a cons: (\"tag-name\" . number)."
 	 (start (car region))
 	 (end (cdr region))
 	 (blorgv-header nil))
-    (dolist (opt blorg-options-regexps-alist)
-      (add-to-list 'blorgv-header (car opt) t)
-      (add-to-list 'blorgv-header (blorg-get-option
-			   start end opt) t)) blorgv-header))
+	(apply 'append
+		   (mapcar (lambda (opt) (list (car opt)
+									   (blorg-get-option start end opt)))
+				   blorg-options-regexps-alist))))
 
 
 (defun blorg-count-tags-total (taglist)
