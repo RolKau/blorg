@@ -148,8 +148,6 @@
 (defvar blorgv-post-title nil)
 (defvar blorgv-post-rel-url nil)
 (defvar blorgv-xml-css nil)
-(defvar blorgv-created-row "")
-(defvar blorgv-modified-row "")
 (defvar blorgv-updated "")
 (defvar blorgv-published nil)
 (defvar blorgv-content nil)
@@ -186,7 +184,6 @@
     (:subtitle "^#\\+SUBTITLE:[ \t]+\\(.+\\)$")
     (:author "^#\\+AUTHOR:[ \t]+\\(.+\\)$")
     (:email "^#\\+EMAIL:[ \t]+\\(.+\\)$")
-    (:created "^#\\+CREATED:[ \t]+<\\([^>]+\\)>$")
     (:modified "^#\\+Time-stamp:[ \t]+<\\([^>]+\\)>$")
     (:blog-url "^#\\+BLOG_URL:[ \t]+\\(.+\\)$")
     (:homepage "^#\\+HOMEPAGE:[ \t]+\\(.+\\)$")
@@ -278,8 +275,7 @@
     :subtitle "[No_subtitle]"
     :author ,user-full-name
     :email ,user-mail-address
-    :created ,(format-time-string (car org-time-stamp-formats))
-    :modified ,(format-time-string time-stamp-format)
+    :modified nil
     :blog-url "./"
     :homepage "[No_homepage]"
     :language ,(if (getenv "LANG") (substring (getenv "LANG") 0 2) "en")
@@ -735,12 +731,6 @@ Each cell in this list is a list of the form:
 	blorgv-language (plist-get blorgv-header :language)
 	blorgv-homepage (plist-get blorgv-header :homepage)
 	blorgv-xml-css (plist-get blorgv-header :xml-css)
-	blorgv-created-row (blorg-encode-time 
-			    (or (plist-get blorgv-header :created)
-					(blorg-timestamp-to-iso8601 (current-time))))
-	blorgv-modified-row (blorg-encode-time 
-			     (or (plist-get blorgv-header :modified)
-					 (blorg-timestamp-to-iso8601 (current-time))))
 	blorgv-done-string (or (plist-get blorgv-header :done-string) "DONE") 
 ;;	(car (reverse (split-string (plist-get blorgv-header :seq-todo)))))
 	blorgv-template-d (plist-get blorgv-header :template-dir)
@@ -796,6 +786,8 @@ If ALL is non-nil, force re-publication of each post."
 	 (new-tags (blorg-parse-new-tags blorgv-content))
 	 (last-month
 	  (blorg-make-arch-month-list (current-time) blorgv-content))
+	 (blorgv-created-row (blorg-infer-date-of-creation blorgv-content))
+	 (blorgv-modified-row (or (plist-get blorgv-header :created) (current-time)))
 	 (months-list 
 	  (blorg-make-arch-month-list blorgv-created-row blorgv-content)))
     (when (not blorgv-content)
@@ -858,6 +850,34 @@ If ALL is non-nil, force re-publication of each post."
 ;;       (when (not (member file posts-files))
 ;; 	(delete-file (concat blorgv-publish-d file))))))
 
+(defun nil-< (a b)
+  "less-than function whose arguments can be nil (lesser than anything)."
+  (when b
+    (if a (< a b) t)))
+
+(defun tuple-< (a b)
+  "Compare two tuples to see if A is strictly less than B."
+  (if (equal (car a) (car b))
+	  (unless (and (null (cdr a)) (null (cdr b)))
+		(tuple-< (cdr a) (cdr b)))
+	(nil-< (car a) (car b))))
+
+(defun blorg-date-of-first-post (blorgv-content)
+  "Earliest close date amongst all posts."
+  (let (all-closed-dates)
+	(dolist (post blorgv-content)
+	  (let ((this-closed-date (plist-get post :post-closed)))
+		(if this-closed-date
+			(add-to-list 'all-closed-dates this-closed-date))))
+	(setq all-closed-dates (sort all-closed-dates 'tuple-<))
+	(car all-closed-dates)))
+
+(defun blorg-infer-date-of-creation (blorgv-content)
+  "Date of first post, or today if no posts have been marked as CLOSED."
+  (let ((date-of-first-post (blorg-date-of-first-post blorgv-content)))
+	(cond
+	 (date-of-first-post)
+	 ((current-time)))))
 
 (defun blorg-parse-new-tags (blorgv-content)
    "Parse BLORGV-CONTENT and look for new tags."
