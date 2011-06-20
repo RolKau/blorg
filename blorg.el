@@ -367,7 +367,7 @@ Allowed symbols are: index tag."
 		(const :tag "Alphabetical" alphabetical))
   :group 'blorg)
 
-(defcustom blorg-rss-content-format 'txt
+(defcustom blorg-rss-content-format 'html
   "The format for rendering the content of RSS feeds."
   :group 'blorg
   :type '(radio (const :tag "Render in HTML" html)
