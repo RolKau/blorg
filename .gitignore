@@ -1,0 +1,10 @@
+# backup files
+*~
+\#*\#
+
+# compiled bytecode
+*.elc
+
+# version control artifacts
+*.rej
+*.orig
