@@ -706,18 +706,9 @@ Each cell in this list is a list of the form:
   :type 'hook)
 
 ;;; Main code
-(defvar blorg-set-header-done ""
-  "Non-nil means header has been already parsed in this session.")
-
-(defun blorg-set-header (&optional force)
-  "Set the header if it's not set and maybe FORCE the setting."
-  (when (or (not (equal blorg-set-header-done (buffer-name))) force)
-    (setq blorgv-header (blorg-parse-header)
-	  blorg-set-header-done (buffer-name))
-    (blorg-set-header-vars)))
-
 (defun blorg-set-header-vars nil
   "Set each var from the header."
+  (setq blorgv-header (blorg-parse-header))
   (setq blorgv-publish-index-only 
 	(not (and (memq 'tag blorg-publish-page-type)
 		  (memq 'month blorg-publish-page-type)
@@ -768,24 +759,20 @@ Each cell in this list is a list of the form:
 	(setq blorg-month-page-template blorg-index-template)))
 
 ;;;###autoload
-(defun blorg-publish (&optional all)
-  "Publish an `org-mode' file as a blog.
-If ALL is non-nil, force re-publication of each post."
-  (interactive "P")
+(defun blorg-publish ()
+  "Publish an `org-mode' file as a blog."
+  (interactive)
   (unless (eq major-mode 'org-mode) 
     (error "Not in an org buffer"))
   (blorg-set-time-formats)
-  (blorg-set-header all)
+  (blorg-set-header-vars)
   (run-hooks 'blorg-before-publish-hook)
   (let* ((blorgv-content (blorg-parse-content 
 			 blorgv-done-string 
-			 blorg-reverse-posts-order all))
+			 blorg-reverse-posts-order))
 	 (tags (blorg-parse-tags))
 	 (blorgv-tagstotal (blorg-count-tags-total tags))
 	 (blorgv-tagsaverage (if tags (/ blorgv-tagstotal (length tags)) 1))
-	 (new-tags (blorg-parse-new-tags blorgv-content))
-	 (last-month
-	  (blorg-make-arch-month-list (current-time) blorgv-content))
 	 (blorgv-created-row (blorg-infer-date-of-creation blorgv-content))
 	 (blorgv-modified-row (or (plist-get blorgv-header :created) (current-time)))
 	 (months-list 
@@ -825,15 +812,13 @@ If ALL is non-nil, force re-publication of each post."
 	  (blorg-render-feed blorgv-content))
 	(when (memq 'tag blorg-publish-page-type)
 	  (blorg-render-tags-pages
-	   tags blorgv-content months-list
-	   (unless all new-tags) all))
+	   tags blorgv-content months-list))
 	(when (memq 'month blorg-publish-page-type)
 	  (blorg-render-month-pages
-	   tags blorgv-content (if all months-list last-month)))
+	   tags blorgv-content months-list))
 	(when (memq 'month blorg-publish-page-type)
 	  (blorg-render-posts-html 
-	   tags (blorg-limit-content-to-plist 
-		 blorgv-content :post-force)))))))
+	   tags blorgv-content))))))
   (run-hooks 'blorg-after-publish-hook)
   (when (get-buffer "*blorg feed output*")
     (kill-buffer "*blorg feed output*")))
@@ -992,11 +977,10 @@ Each element of the list is a cons: (\"tag-name\" . number)."
 
 
 (defun blorg-parse-content
-  (blorgv-done-string reverse all)
+  (blorgv-done-string reverse)
   "Parse blorgv-content of an `org-mode' buffer.
 Check the presence of BLORGV-DONE-STRING in each post.
-REVERSE posts order is necessary.
-Maybe parse ALL posts."
+REVERSE posts order is necessary."
   (let (posts (cnt 0))
     (save-excursion
       (goto-char (point-min))
@@ -1027,29 +1011,20 @@ Maybe parse ALL posts."
 			      (re-search-forward "^\\* " nil t))
 			    (match-beginning 0)
 			  (point-max))
-			post-exists all) t)
+			post-exists) t)
 	  (setq cnt (1+ cnt)))))
     (if reverse (reverse posts) posts)))
 
 
-(defun blorg-parse-post (number title tags dte end exists force)
+(defun blorg-parse-post (number title tags dte end exists)
   "Parse post NUMBER with TITLE and TAGS from DATE ending at END."
   `(:post-number ,number
     :post-title ,(blorg-strip-trailing-spaces title)
     :post-tags ,tags
     :post-exists ,exists
-    :post-force ,(blorg-check-post-force force number exists)
     :post-closed ,dte
     :post-updated ,(current-time)
     :post-content ,(blorg-get-post-content end)))
-
-
-(defun blorg-check-post-force (force number exists)
-  "Check whether post should be published depending on FORCE."
-  (cond ((not exists) t)
-	((null force) nil)
-	((listp force) t)
-	((numberp force) (< number force))))
 
 
 (defun blorg-get-post-content (end)
@@ -1317,10 +1292,10 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST are required."
 
 
 (defun blorg-render-tags-pages
-  (tags blorgv-content months-list new-tags all)
+  (tags blorgv-content months-list)
   "Render one page per tag.
-BLORGV-HEADER TAGS BLORGV-CONTENT MONTHS-LIST NEW-TAGS and ALL are required."
-    (dolist (tag (if all tags new-tags))
+BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST  are required."
+    (dolist (tag tags)
       (let* ((tag-name (car tag))
 	     (file-name (concat blorgv-publish-d tag-name 
 				(plist-get blorg-strings :page-extension)))
@@ -1559,13 +1534,6 @@ blorgv-language "\" lang=\"" blorgv-language"\">
 			       (car blorgv-time-stamp-formats)
 			       (plist-get post :post-closed))))
 		    post)) blorgv-content)))
-
-
-(defun blorg-limit-content-to-plist (blorgv-content plst)
-  "Limit BLORGV-CONTENT to posts with non-nil PLST."
-  (delq nil (mapcar (lambda (post)
-		      (when (plist-get post plst) post)) 
-		    blorgv-content)))
 
 
 (defun blorg-limit-content-to-tag (blorgv-content tag-name)
