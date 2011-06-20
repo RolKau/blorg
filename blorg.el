@@ -705,6 +705,16 @@ Each cell in this list is a list of the form:
 		:value-type (repeat symbol))
   :group 'blorg-templates-for-posts)
 
+(defcustom blorg-before-publish-hook nil
+  "Psuedo-mode load hook for blorg, run before the blog is published."
+  :group 'blorg
+  :type 'hook)
+
+(defcustom blorg-after-publish-hook nil
+  "Psuedo-mode cleanup hook for blorg, run after the blog is published."
+  :group 'blorg
+  :type 'hook)
+
 ;;; Main code
 (defvar blorg-set-header-done ""
   "Non-nil means header has been already parsed in this session.")
@@ -790,6 +800,7 @@ If ALL is non-nil, force re-publication of each post."
     (error "Not in an org buffer"))
   (blorg-set-time-formats)
   (blorg-set-header all)
+  (run-hooks 'blorg-before-publish-hook)
   (let* ((blorgv-content (blorg-parse-content 
 			 blorgv-done-string 
 			 blorg-reverse-posts-order all))
@@ -851,6 +862,7 @@ If ALL is non-nil, force re-publication of each post."
 	  (blorg-render-posts-html 
 	   tags (blorg-limit-content-to-plist 
 		 blorgv-content :post-force))))))
+  (run-hooks 'blorg-after-publish-hook)
   (when (get-buffer "*blorg feed output*")
     (kill-buffer "*blorg feed output*")))
 
