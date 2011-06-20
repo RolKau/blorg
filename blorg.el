@@ -824,6 +824,14 @@ If ALL is non-nil, force re-publication of each post."
     ;;; Create directories
     (blorg-maybe-create-directories
      blorgv-publish-d blorgv-images-d blorgv-upload-d)
+	;; Copy stylesheets from template to publish directory
+	(when blorgv-template-d
+	  (dolist (which-ml '(:html-css :xml-css))
+		(let ((css-name (plist-get blorgv-header which-ml)))
+		  (when css-name
+			(let ((src-f (concat blorgv-template-d css-name))
+				  (dst-f (concat blorgv-publish-d css-name)))
+			  (blorg-cp-if-newer src-f dst-f))))))
     ;; Maybe clean orphan files
 ;;    (blorg-maybe-clean-orphan-files blorgv-content)
     (save-window-excursion
@@ -1876,19 +1884,23 @@ When FULL render full blorgv-content, otherwise just insert some headlines."
 								blorgv-images-d
 							  blorgv-upload-d)))
 				;; copy to appropriate directory
-				(save-match-data
-				  (let ((src-f (substring-no-properties raw-link))
-						(dst-f (substring-no-properties (concat blorgv-publish-d
-																sub-d
-																raw-rel-link))))
-					(if (file-readable-p src-f)
-						(if (or (not (file-exists-p dst-f))
-								(file-newer-than-file-p src-f dst-f))
-							(eshell/cp src-f dst-f)))))
+				(let ((src-f (substring-no-properties raw-link))
+					  (dst-f (substring-no-properties (concat blorgv-publish-d
+															  sub-d
+															  raw-rel-link))))
+				  (blorg-cp-if-newer src-f dst-f))
 				;; rewrite with link to new directory.
 				(replace-match (concat "[[./" sub-d raw-rel-link
 									   (if link-desc (concat "][" link-desc))
 									   "]]"))))))))))
+
+(defun blorg-cp-if-newer (src-f dst-f)
+  "Copy SRC-F to DST-F if the latter does not exist or is older."
+  (save-match-data
+	(if (file-readable-p src-f)
+		(if (or (not (file-exists-p dst-f))
+				(file-newer-than-file-p src-f dst-f))
+			(eshell/cp src-f dst-f)))))
 
 (defun blorg-trim-leading-and-trailing-lines ()
   (save-excursion
