@@ -817,6 +817,8 @@ If ALL is non-nil, force re-publication of each post."
 ;;    (blorg-maybe-clean-orphan-files blorgv-content)
     (save-window-excursion
       (save-excursion
+		(let ((backup-inhibited t)
+			  (auto-save-default nil))
 	;; always publish index
 	(blorg-render-index tags blorgv-content)
 	(when (memq 'index blorg-publish-feed)
@@ -831,7 +833,7 @@ If ALL is non-nil, force re-publication of each post."
 	(when (memq 'month blorg-publish-page-type)
 	  (blorg-render-posts-html 
 	   tags (blorg-limit-content-to-plist 
-		 blorgv-content :post-force))))))
+		 blorgv-content :post-force)))))))
   (run-hooks 'blorg-after-publish-hook)
   (when (get-buffer "*blorg feed output*")
     (kill-buffer "*blorg feed output*")))
