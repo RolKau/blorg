@@ -1888,6 +1888,12 @@ When FULL render full blorgv-content, otherwise just insert some headlines.
 You can give a specific BLORGV-POST-TITLE to this post."
   (with-temp-buffer
     (insert blorgv-content)
+	;; process block section (#+BEGIN_xxx ... #+END_xxx)
+	(org-export-handle-include-files)
+	(org-export-remove-comment-blocks-and-subtrees)
+	(org-export-replace-src-segments-and-examples 'html)
+	(org-export-select-backend-specific-text 'html)
+	;; other markup
     (goto-char (point-min))
     (blorg-convert-fontification)
     (blorg-convert-ol)
