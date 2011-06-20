@@ -169,6 +169,7 @@
 (defvar blorgv-email "")
 (defvar blorgv-ins-full nil)
 (defvar blorgv-tags-links nil)
+(defvar blorgv-template-d nil)
 (defvar blorgv-publish-d "~/public_html/")
 (defvar blorgv-images-d "upload/")
 (defvar blorgv-upload-d "images/")
@@ -204,6 +205,7 @@
 ;;    (:seq-todo "^#\\+SEQ_TODO:[ \t]+\\(.+\\)$")
     (:done-string "^#\\+DONE_STRING:[ \t]+\\(.+\\)$")
     (:publish-dir "^#\\+PUBLISH_DIR:[ \t]+\\(.+\\)$")
+	(:template-dir "^#\\+TEMPLATE_DIR:[ \t]+\\(.+\\)$")
     (:upload-dir "^#\\+UPLOAD_DIR:[ \t]+\\(.+\\)$")
     (:images-dir "^#\\+IMAGES_DIR:[ \t]+\\(.+\\)$")
     (:config-file "^#\\+CONFIG_FILE:[ \t]+\\(.+\\)$"))
@@ -296,6 +298,7 @@
     :done-string "DONE"
     :number-of-posts "12"
     :publish-dir "~/public_html/"
+	:template-dir nil
     :upload-dir "upload/"
     :images-dir "images/")
   "A list of default options.
@@ -669,6 +672,7 @@ Each cell in this list is a list of the form:
 	blorgv-modified-rfc3339 (blorg-timestamp-to-rfc3339 blorgv-modified-row)
 	blorgv-done-string (or (plist-get blorgv-header :done-string) "DONE") 
 ;;	(car (reverse (split-string (plist-get blorgv-header :seq-todo)))))
+	blorgv-template-d (plist-get blorgv-header :template-dir)
 	blorgv-publish-d (plist-get blorgv-header :publish-dir)
 	blorgv-upload-d (plist-get blorgv-header :upload-dir)
 	blorgv-images-d (plist-get blorgv-header :images-dir)
@@ -681,7 +685,27 @@ Each cell in this list is a list of the form:
       (setq blorgv-time-stamp-formats org-time-stamp-custom-formats)
     (setq blorgv-time-stamp-formats org-time-stamp-formats)))
 
-  
+(defun blorg-load-templates-dir (blorgv-template-d)
+  (when blorgv-template-d
+	;; read each of these templates
+	(dolist (templ-name '(index
+						  post-page
+						  post
+						  post-author
+						  post-dates
+						  post-tags))
+	  (let ((templ-file (concat blorgv-template-d (format "%s.html" templ-name)))
+			(templ-var  (format "blorg-%s-template" templ-name)))
+		;; if the file exists, read it into buffer and put in variable
+		(when (file-readable-p templ-file)
+		  (with-temp-buffer
+			(insert-file-contents templ-file nil nil nil t)
+			(set (intern templ-var) (buffer-string))
+			(message "Loaded %s from \"%s\"" templ-var templ-file)))))
+	;; reuse the index page for tag page, monthly page and post-page
+	(setq blorg-tag-page-template blorg-index-template)
+	(setq blorg-month-page-template blorg-index-template)))
+
 ;;;###autoload
 (defun blorg-publish (&optional all)
   "Publish an `org-mode' file as a blog.
@@ -712,6 +736,8 @@ If ALL is non-nil, force re-publication of each post."
 		   blorgv-content)))
     (when (not blorgv-content)
       (error "No headline suitable for publication"))
+	;; Load templates if directory specified
+	(blorg-load-templates-dir blorgv-template-d)
     ;;; Load config file
     (unless (or (equal blorg-config-file "")
 		(not (file-exists-p blorg-config-file)))
@@ -857,6 +883,7 @@ Each element of the list is a cons: (\"tag-name\" . number)."
 		(match-string-no-properties 1))
 	    (if (or ; Add blorgv-homepage ?
 		 (eq (car option) :blog-url)
+		 (eq (car option) :template-dir)
 		 (eq (car option) :publish-dir)
 		 (eq (car option) :images-dir)
 		 (eq (car option) :upload-dir))
