@@ -148,14 +148,8 @@
 (defvar blorgv-post-title nil)
 (defvar blorgv-post-rel-url nil)
 (defvar blorgv-xml-css nil)
-(defvar blorgv-created "")
 (defvar blorgv-created-row "")
-(defvar blorgv-created-rfc3339 "")
-(defvar blorgv-created-rfc822 "")
-(defvar blorgv-modified "")
 (defvar blorgv-modified-row "")
-(defvar blorgv-modified-rfc3339 "")
-(defvar blorgv-modified-rfc822 "")
 (defvar blorgv-updated "")
 (defvar blorgv-published nil)
 (defvar blorgv-content nil)
@@ -743,18 +737,10 @@ Each cell in this list is a list of the form:
 	blorgv-xml-css (plist-get blorgv-header :xml-css)
 	blorgv-created-row (blorg-encode-time 
 			    (or (plist-get blorgv-header :created)
-				(format-time-string (car blorgv-time-stamp-formats)))
-			    "\\([0-9]+\\)-\\([0-9]+\\)-\\([0-9]+\\)")
-	blorgv-created (blorg-timestamp-to-readable blorgv-created-row)
-	blorgv-created-rfc822 (blorg-timestamp-to-rfc822 blorgv-created-row)
-	blorgv-created-rfc3339 (blorg-timestamp-to-rfc3339 blorgv-created-row)
+					(blorg-timestamp-to-iso8601 (current-time))))
 	blorgv-modified-row (blorg-encode-time 
 			     (or (plist-get blorgv-header :modified)
-				 (format-time-string (car blorgv-time-stamp-formats)))
-			     "\\([0-9]+\\)-\\([0-9]+\\)-\\([0-9]+\\)")
-	blorgv-modified (blorg-timestamp-to-readable blorgv-modified-row)
-	blorgv-modified-rfc822 (blorg-timestamp-to-rfc822 blorgv-modified-row)
-	blorgv-modified-rfc3339 (blorg-timestamp-to-rfc3339 blorgv-modified-row)
+					 (blorg-timestamp-to-iso8601 (current-time))))
 	blorgv-done-string (or (plist-get blorgv-header :done-string) "DONE") 
 ;;	(car (reverse (split-string (plist-get blorgv-header :seq-todo)))))
 	blorgv-template-d (plist-get blorgv-header :template-dir)
@@ -809,17 +795,9 @@ If ALL is non-nil, force re-publication of each post."
 	 (blorgv-tagsaverage (if tags (/ blorgv-tagstotal (length tags)) 1))
 	 (new-tags (blorg-parse-new-tags blorgv-content))
 	 (last-month
-	  (blorg-make-arch-month-list (format-time-string "%Y-%m-%d")
-				      blorgv-content))
+	  (blorg-make-arch-month-list (current-time) blorgv-content))
 	 (months-list 
-	  (blorg-make-arch-month-list
-	   (progn (string-match ;;org-ts-regexp-both
-				"[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}"
-				(plist-get blorgv-header :created))
-;;		  (substring
-		   (match-string-no-properties 
-		    0 (plist-get blorgv-header :created))); 0 10))
-		   blorgv-content)))
+	  (blorg-make-arch-month-list blorgv-created-row blorgv-content)))
     (when (not blorgv-content)
       (error "No headline suitable for publication"))
 	;; Load templates if directory specified
@@ -1016,7 +994,7 @@ Maybe parse ALL posts."
 				(re-search-forward "^\\* " nil t)) t))
 			   (match-string-no-properties 1))
 			 (format-time-string (cdr blorgv-time-stamp-formats)))
-		     "\\([0-9]+\\)-\\([0-9]+\\)-\\([0-9]+\\) \\(.*?\\) \\([0-9]+\\):\\([0-9]+\\)"))
+			 t))
 	       (post-exists 
 		(file-exists-p (concat blorgv-publish-d 
 				       (blorg-make-post-url ttle)))))
@@ -1146,7 +1124,7 @@ NEW-TITLE is the new title.  Er."
 
   <title type=\"text\">" title "</title>
   <subtitle type=\"text\">" blorgv-subtitle  "</subtitle>
-  <updated>" blorgv-modified-rfc3339 "</updated>
+  <updated>" (blorg-timestamp-to-rfc3339 blorgv-modified-row) "</updated>
   <id>" blorgv-blog-url "</id>
   <link rel=\"alternate\" type=\"text/html\" hreflang=\""
   blorgv-language "\" href=\"" blorgv-blog-url "\" />
@@ -1169,8 +1147,8 @@ NEW-TITLE is the new title.  Er."
     <link>" blorgv-blog-url "</link>
     <language>" blorgv-language "</language>
     <description>" blorgv-subtitle "</description>
-    <pubDate>" blorgv-created-rfc822 "</pubDate>
-    <lastBuildDate>" blorgv-modified-rfc822 "</lastBuildDate>
+    <pubDate>" (blorg-timestamp-to-rfc822 blorgv-created-row) "</pubDate>
+    <lastBuildDate>" (blorg-timestamp-to-rfc822 blorgv-modified-row) "</lastBuildDate>
     <copyright>(c) " (concat (format-time-string "%Y") " " blorgv-author) "</copyright>
     <docs>" blorgv-blog-url "</docs>
     <generator>blorg version " blorg-version "</generator>\n"))
@@ -1935,8 +1913,8 @@ You can give a specific BLORGV-POST-TITLE to this post."
   (blorgv-created blorgv-content)
     "Depending on BLORGV-CREATED date, make a list from BLORGV-CONTENT containing each archived month."
     (unless (not blorgv-content)
-  (let* ((start-y (string-to-number (car (split-string blorgv-created "-"))))
-	 (start-m (string-to-number (cadr (split-string blorgv-created "-"))))
+  (let* ((start-y (nth 5 (decode-time blorgv-created)))
+	 (start-m (nth 4 (decode-time blorgv-created)))
 	 (end-y (nth 5 (decode-time)))
 	 (end-m (nth 4 (decode-time)))
 	 (nb-of-m (calendar-interval start-m start-y end-m end-y))
@@ -2009,9 +1987,16 @@ Example: Sunday, May 07 2006 @ 10:35 +0100"
     (format-time-string 
      (plist-get blorg-strings :time-format) time nil)))
 
+(defun blorg-timestamp-to-iso8601 (time)
+  "Convert an `org-mode` TIMESTAMP to ISO-8601 format.
+Example: 2011-12-31 13:59"
+  (format-time-string "%Y-%m-%d %H:%M" time))
 
-(defun blorg-encode-time (timestamp format)
+(defun blorg-encode-time (timestamp &optional incl-time)
   "Encode TIMESTAMP."
+  (let ((format (concat "\\([0-9]+\\)-\\([0-9]+\\)-\\([0-9]+\\)"
+						(if incl-time
+							 " \\(.*?\\) \\([0-9]+\\):\\([0-9]+\\)"))))				  
   (when (string-match format timestamp)
     (let ((year (string-to-number (match-string 1 timestamp)))
 	  (month (string-to-number (match-string 2 timestamp)))
@@ -2020,7 +2005,7 @@ Example: Sunday, May 07 2006 @ 10:35 +0100"
 		  (string-to-number (match-string 5 timestamp)) 0))
 	  (min (if (match-string 6 timestamp)
 		  (string-to-number (match-string 6 timestamp)) 0)))
-      (encode-time 0 min hour day month year))))
+      (encode-time 0 min hour day month year)))))
 
 
 
