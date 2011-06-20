@@ -1081,7 +1081,7 @@ NEW-TITLE is the new title.  Er."
   "Render content of feed in rss 2.0 format."
   (insert "
     <item>
-      <title>" blorgv-post-title "</title>
+      <title>" (blorg-escape blorgv-post-title 'entity) "</title>
       <link>" (concat blorgv-blog-url blorgv-post-rel-url) "</link>
       <description>\n" (if (eq blorg-rss-content-format 'html)
 			   (blorg-render-post-content-html blorgv-content)
@@ -1096,7 +1096,7 @@ NEW-TITLE is the new title.  Er."
   "Render content of feed in atom format."
     (insert "
 <entry>
-  <title>" blorgv-post-title "</title>
+  <title>" (blorg-escape blorgv-post-title 'entity) "</title>
   <link rel=\"alternate\" type=\"text/html\" href=\""
   (concat blorgv-blog-url blorgv-post-rel-url) "\"/>
   <id>" (concat blorgv-blog-url blorgv-post-rel-url) "</id>
@@ -1389,8 +1389,9 @@ blorgv-language "\" lang=\"" blorgv-language"\">
 
 (defun blorg-render-content-html (post blorgv-blog-url)
   "Render POST in html with BLORGV-BLOG-URL."
-  (let* ((blorgv-post-title (plist-get post :post-title))
-	 (blorgv-post-rel-url (blorg-make-post-url blorgv-post-title))
+  (let* ((blorgv-post-raw-title (plist-get post :post-title))
+	 (blorgv-post-rel-url (blorg-make-post-url blorgv-post-raw-title))
+	 (blorgv-post-title (blorg-escape blorgv-post-raw-title 'entity))
 	 (post-abs-url (concat blorgv-blog-url blorgv-post-rel-url))
 	 (tags (delete "" (split-string (plist-get post :post-tags) ":")))
 	 (post-tags (mapconcat (lambda (tag) tag) tags " "))
@@ -1416,7 +1417,7 @@ blorgv-language "\" lang=\"" blorgv-language"\">
 	    ((member (char-after) '(?  ?\' ?/ ?% ?# ?= ?+))
 	     (progn (delete-char 1) (insert "-")))
 	    ((member (char-after)
-		     '(?\" ?, ?\; ?: ?? ?! ?. ?$ ?\t))
+		     '(?\" ?, ?\; ?: ?? ?! ?. ?$ ?\t ?< ?> ?&))
 	     (progn (delete-char 1)))
 	    ((not (eq (car (split-char (char-after))) 'ascii))
 	     (delete-char 1))
@@ -1827,21 +1828,29 @@ blorgv-language "\" lang=\"" blorgv-language"\">
 				      org-emphasis-alist))))
 	     (replace-match (concat tag-b body tag-e postmatch) t))))))
 
-(defun blorg-convert-special-chars nil
-  "Convert special strings."
-  (save-excursion 
-    (goto-char (point-min))
-    (org-export-html-convert-special-strings
-     (append org-export-html-special-string-regexps 
-	     '(("<" . "&gt;") (">" . "&lt;") ("&" . "&amp;"))))))
+(defconst blorg-special-html-chars
+  '(("&"  . (entity "&amp;"  esccode "%26"))
+	("\"" . (entity "&quot;" esccode "%22"))
+	("'"  . (entity "&apos;" esccode "%27"))
+	("<"  . (entity "&lt;"   esccode "%3C"))
+	(">"  . (entity "&gt;"   esccode "%3E"))
+	))
 
+(defun blorg-escape (text how)
+  "Escape special XML/HTML characters -- <, >, &, etc."
+  (when text
+	(save-match-data
+	  (mapcar (lambda (x)
+				(setf text (replace-regexp-in-string (car x) (plist-get (cdr x) how) text)))
+			  blorg-special-html-chars))
+	text))
 
 (defun blorg-convert-links
   (url-type raw-link &optional link-desc)
   "Convert URL-TYPE as a mix of RAW-LINK and LINK-DESC."
   (let* ((raw-rel-link (file-name-nondirectory raw-link))
 	 (raw-link-ext (file-name-extension raw-link))
-	 (desc (or link-desc raw-rel-link)))
+	 (desc (or (blorg-escape link-desc 'entity) raw-rel-link)))
     (cond
      ;; files and images
      ((equal url-type "file")
