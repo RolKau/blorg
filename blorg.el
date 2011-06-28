@@ -1500,7 +1500,7 @@ blorgv-language "\" lang=\"" blorgv-language"\">
 	       (blorg-timestamp-to-readable (plist-get post :post-closed)))
     (plist-put blorgv-header :tp-updated
 	       (blorg-timestamp-to-readable (plist-get post :post-updated)))
-    (blorg-insert-post blorg-post-template)))
+    (blorg-insert-body blorg-post-template)))
 
 
 (defun blorg-make-post-url (blorgv-post-title)
@@ -1570,15 +1570,6 @@ blorgv-language "\" lang=\"" blorgv-language"\">
 		    (macroexpand `(,part))))
 		(blorg-split-template tpl))))
 
-
-(defun blorg-insert-post (tpl)
-  "Insert post with TPL."
-  (mapc (lambda (func) (eval func))
-	(mapcar (lambda (part)
-		  (if (stringp part)
-		      (list 'insert part)
-		    (macroexpand `(,part))))
-		(blorg-split-template tpl))))
 
 (defun blorg-sort-content-tag (blorgv-content tag-name)
   "Remove posts from BLORGV-CONTENT if they don't match TAG-NAME."
