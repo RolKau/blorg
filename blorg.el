@@ -325,7 +325,7 @@ put full posts in the index."
   :type '(repeat (symbol :tag "Page: "))
   :group 'blorg)
 
-(defcustom blorg-reverse-posts-order nil
+(defcustom blorg-reverse-posts-order t
   "Non-nil means reverse order of posts publication."
   :type 'boolean
   :group 'blorg)
@@ -628,7 +628,7 @@ Here is the list of defuns that you can insert in this template:
 
 
 (defcustom blorg-put-full-post
-  '(index post)
+  '(post)
   "Pages in which posts will appear as full posts.
 Posts in other pages are summarized.
 
@@ -644,7 +644,7 @@ This list can include the following symbols:
 
 
 (defcustom blorg-put-author-in-post
-  '(post tag)
+  '(index post tag month)
   "Put author's name in posts when publishing these pages.
 See `blorg-put-full-post' for the list of available pages."
   :type '(repeat (symbol :tag "Page: "))
