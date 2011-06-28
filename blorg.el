@@ -365,6 +365,41 @@ Allowed symbols are: index tag."
 
 ;;; Templates
 
+(defcustom blorg-head-template
+  "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"
+	  \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">
+<html xmlns=\"http://www.w3.org/1999/xhtml\"
+      xml:lang=\"(blorg-insert-lang-code)\"
+      lang=\"(blorg-insert-lang-code)\">
+<head>
+  <title>(blorg-insert-page-title)</title>
+  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=(blorg-insert-encoding)\" />
+  <meta name=\"generator\" content=\"blorg\" />
+  <meta name=\"description\" content=\"(blorg-insert-page-subtitle)\" />
+  <meta name=\"keywords\" content=\"(blorg-insert-keyword-list)\" />
+  (blorg-insert-robots-instr)
+  <meta name=\"author\" content=\"(blorg-insert-author)\" />
+  <link rel=\"stylesheet\" type=\"text/css\" title=\"Default\" media=\"screen\" href=\"(blorg-insert-html-css)\" />
+  (blorg-insert-feed-link)
+</head>
+"
+  "Template for the page header.
+
+Here is a list of defuns you can use in this template:
+
+(blorg-insert-lang-code)     : language code for contents (default: \"en\")
+(blorg-insert-encoding)      : character encoding of the contents (default: \"UTF-8\")
+(blorg-insert-feed-link)     : link to the feed that is generated
+(blorg-insert-page-title)    : title of the page
+(blorg-insert-page-subtitle) : subtitle of the page
+(blorg-insert-author)        : name of the author
+(blorg-insert-keyword-list)  : comma-separated list of keywords
+(blorg-insert-robots-instr)  : instructions for spiders (default: \"index,follow\")
+(blorg-insert-html-css)      : name of stylesheet
+"
+:type 'string
+:group 'blorg-templates-for-pages)
+
 (defcustom blorg-index-template
   "
 <body>
@@ -740,7 +775,8 @@ Each cell in this list is a list of the form:
 (defun blorg-load-templates-dir (blorgv-template-d)
   (when blorgv-template-d
 	;; read each of these templates
-	(dolist (templ-name '(index
+	(dolist (templ-name '(head
+						  index
 						  post-page
 						  post
 						  post-author
@@ -1460,28 +1496,9 @@ TAG is the set of tags."
 	   'eval
 	   (split-string (or (plist-get blorgv-header :tp-keywords) 
 			     blorgv-keywords)) ", ") ))
-	(html-css (plist-get blorgv-header :html-css)))
-    (insert "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"
-	  \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">
-<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\""
-blorgv-language "\" lang=\"" blorgv-language"\">
-<head>
-  <title>" page-title "</title>
-  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=" blorgv-encoding "\" />
-  <meta name=\"generator\" content=\"blorg\" />
-  <meta name=\"description\" content=\"" blorgv-subtitle "\" />
-  <meta name=\"keywords\" content=\"" keywords "\" />
-  <meta name=\"robots\" content=\"" 
-  (plist-get blorg-strings :meta-robots)
-  "\" />
-  <meta name=\"author\" content=\"" blorgv-author "\" />
-  <link href=\"" html-css
-  "\" rel=\"stylesheet\" title=\"Default\" type=\"text/css\" media=\"screen\" />")
-    (when feed-url (insert "
-  <link rel=\"alternate\" type=\"application/" blorgv-feed-type
-  "+xml\" title=\"" page-title "\" href=\""
-  feed-url "\" />"))
-    (insert "\n</head>\n")))
+	(html-css (plist-get blorgv-header :html-css))
+	(robots (plist-get blorgv-header :meta-robots)))
+    (blorg-insert-body blorg-head-template)))
 
 
 (defun blorg-render-content-html (post blorgv-blog-url)
@@ -1754,6 +1771,39 @@ blorgv-language "\" lang=\"" blorgv-language"\">
   `(when (and (not (null ins-tags))
 	      (not (equal ,blorgv-tags-links "")))
 	 (blorg-insert-body blorg-post-tags-template)))
+
+(defmacro blorg-insert-lang-code ()
+  "Insert language code (e.g. \"en\" in header."
+  `(insert blorgv-language))
+
+(defmacro blorg-insert-encoding ()
+  "Insert encoding (e.g. \"UTF-8\" in header."
+  `(insert blorgv-encoding))
+
+(defmacro blorg-insert-feed-type ()
+  "Insert feed type (e.g. \"rss\") in header."
+  `(insert blorgv-feed-type))
+
+(defmacro blorg-insert-keyword-list ()
+  "Insert comma-separated list of keywords."
+  `(insert keywords))
+
+(defmacro blorg-insert-robots-instr ()
+  "Insert list of robots instructions (e.g. \"index, follow\") in header."
+  `(when robots
+	 (insert "
+  <meta name=\"robots\" content=\"" robots "\" />")))
+
+(defmacro blorg-insert-html-css ()
+  "Insert stylesheet for web pages (e.g. \"styles.css\") in header."
+  `(insert html-css))
+
+(defmacro blorg-insert-feed-link ()
+  "Insert link for the generated feed in header."
+  `(when feed-url (insert "
+  <link rel=\"alternate\" type=\"application/" blorgv-feed-type
+  "+xml\" title=\"" page-title "\" href=\""
+  feed-url "\" />")))
 
 ;;; Exporting to HTML
 (defconst blorg-special-html-chars
