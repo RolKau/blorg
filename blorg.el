@@ -1740,38 +1740,20 @@ blorgv-language "\" lang=\"" blorgv-language"\">
 (defmacro blorg-insert-post-author nil
   "Insert blorgv-author in post."
     `(when (not (null ins-auth))
-       (mapc (lambda (func) (eval func))
-	     (mapcar (lambda (part)
-		       (if (stringp part)
-			   (list 'insert part)
-			 (macroexpand `(,part))))
-		     (blorg-split-template
-		      blorg-post-author-template)))))
+	   (blorg-insert-body blorg-post-author-template)))
 
 
 (defmacro blorg-insert-post-dates nil
   "Insert dates in post."
     `(when (not (null ins-dates))
-       (mapc (lambda (func) (eval func))
-	     (mapcar (lambda (part)
-		       (if (stringp part)
-			   (list 'insert part)
-			 (macroexpand `(,part))))
-		     (blorg-split-template
-		      blorg-post-dates-template)))))
+	   (blorg-insert-body blorg-post-dates-template)))
 
 
 (defmacro blorg-insert-post-tags nil
   "Insert tags in post."
   `(when (and (not (null ins-tags))
 	      (not (equal ,blorgv-tags-links "")))
-       (mapc (lambda (func) (eval func))
-	     (mapcar (lambda (part)
-		       (if (stringp part)
-			   (list 'insert part)
-			 (macroexpand `(,part))))
-		     (blorg-split-template
-		      blorg-post-tags-template)))))
+	 (blorg-insert-body blorg-post-tags-template)))
 
 ;;; Exporting to HTML
 (defconst blorg-special-html-chars
