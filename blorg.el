@@ -1653,7 +1653,7 @@ blorgv-language "\" lang=\"" blorgv-language"\">
 
 (defmacro blorg-insert-page-title nil
   "Insert page-title."
-  `(insert ,(plist-get blorgv-header :blog-title)))
+  `(insert blorgv-blog-title))
 
 (defmacro blorg-insert-page-subtitle nil
   "Insert page-subtitle."
