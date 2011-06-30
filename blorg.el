@@ -418,18 +418,30 @@ Here is a list of defuns you can use in this template:
 
 	  <div id=\"tags\">
 		<h3>Tags</h3>
-		(blorg-insert-tags-as-cloud)
+        <div id=\"tags-cloud\">
+          <ul>
+            (blorg-insert-tags-as-cloud)
+          </ul>
+        </div>
 	  </div>
 
 	  <div>
 		<h3>Archive</h3>
-		(blorg-insert-archives)
+        <div id=\"archives\">
+          <ul>
+            (blorg-insert-archives)
+          </ul>
+        </div>
 	  </div>
 	</div>
 
 	<div id=\"rightmenu\">
 	  <h3>Older posts</h3>
-	  (blorg-insert-previous-posts)
+      <div id=\"prev-posts\">
+        <ul>
+          (blorg-insert-previous-posts)
+        </ul>
+      </div>
 	</div>
 
 	<div id=\"main\">
@@ -475,18 +487,30 @@ Here is the list of defuns that you can insert in this template:
 
 	  <div id=\"tags\">
 		<h3>Tags</h3>
-		(blorg-insert-tags-as-cloud)
+        <div id=\"tags-cloud\">
+          <ul>
+            (blorg-insert-tags-as-cloud)
+          </ul>
+        </div>
 	  </div>
 
 	  <div>
 		<h3>Archive</h3>
-		(blorg-insert-archives)
+        <div id=\"archives\">
+          <ul>
+            (blorg-insert-archives)
+          </ul>
+        </div>
 	  </div>
 	</div>
 
 	<div id=\"rightmenu\">
 	  <h3>Older posts</h3>
-	  (blorg-insert-previous-posts)
+      <div id=\"prev-posts\">
+        <ul>
+          (blorg-insert-previous-posts)
+        </ul>
+      </div>
 	</div>
 
 	<div id=\"main\">
@@ -532,18 +556,30 @@ Here is the list of defuns that you can insert in this template:
 
 	  <div id=\"tags\">
 		<h3>Tags</h3>
-		(blorg-insert-tags-as-cloud)
+        <div id=\"tags-cloud\">
+          <ul>
+            (blorg-insert-tags-as-cloud)
+          </ul>
+        </div>
 	  </div>
 
 	  <div>
 		<h3>Archive</h3>
-		(blorg-insert-archives)
+        <div id=\"archives\">
+          <ul>
+            (blorg-insert-archives)
+          </ul>
+        </div>
 	  </div>
 	</div>
 
 	<div id=\"rightmenu\">
 	  <h3>Older posts</h3>
-	  (blorg-insert-previous-posts)
+      <div id=\"prev-posts\">
+        <ul>
+          (blorg-insert-previous-posts)
+        </ul>
+      </div>
 	</div>
 
 	<div id=\"main\">
@@ -1397,30 +1433,24 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST are required."
 
 (defun blorg-render-archives-list-html (months-list)
   "Render MONTHS-LIST into an html list with CLASS."
-  (concat "<div id=\"archives\">\n  <ul>\n"
 	  (mapconcat (lambda (mth)
 		       (concat "    <li><a href=\"" (cadr mth) "\">"
 			       (car mth) "</a></li>"))
-		     months-list "\n")
-	  "\n  </ul>\n</div>\n"))
+		     months-list "\n"))
 
 
 (defun blorg-render-previous-posts-list (previous-posts)
   "Render a list containing PREVIOUS-POSTS."
-  (with-temp-buffer
     (when previous-posts
-      (insert "<div id=\"prev-posts\">\n<ul>\n"))
-    (mapc (lambda (post)
-	    (insert "  <li><a href=\""
+	  (mapconcat (lambda (post)
+	    (concat "  <li><a href=\""
 		    (blorg-make-post-url
 		     (plist-get post :post-title))
 		    "\">" (plist-get post :post-title)
 		    "</a></li>\n"))
 	  (blorg-limit-content-to-number
 	   previous-posts
-	   blorg-previous-posts-number))
-    (when previous-posts (insert "</ul>\n</div>\n"))
-    (buffer-string)))
+	   blorg-previous-posts-number) "\n")))
 
 
 (defun blorg-render-tag-feed
@@ -1440,18 +1470,14 @@ TAG-NAME BLORGV-HEADER BLORGV-CONTENT and FEED-NAME are required."
 
 (defun blorg-render-tags-list-html (tags)
   "Render TAGS in a html list."
-  (with-temp-buffer
-    (insert "<div id=\"tags-list\">\n  <ul>\n")
-    (mapc (lambda (tag)
-	    (insert "    <li>[" (number-to-string (cdr tag))
+    (mapconcat (lambda (tag)
+	    (concat "    <li>[" (number-to-string (cdr tag))
 		    "] <a href=\""
 		    (concat (car tag) (plist-get blorg-strings 
 						 :page-extension)) "\">"
 		    (car tag)
 		    "</a></li>\n"))
-	  tags)
-    (insert "  </ul>\n</div>\n\n")
-    (buffer-string)))
+	  tags "\n"))
 
 
 (defun blorg-calc-tag-size (level)
@@ -1464,18 +1490,14 @@ TAG-NAME BLORGV-HEADER BLORGV-CONTENT and FEED-NAME are required."
 
 (defun blorg-render-tags-cloud-html (tags)
   "Render TAGS as a cloud in html."
-  (with-temp-buffer
-    (insert "<div id=\"tags-cloud\">\n")
-    (mapc (lambda (tag)
-	    (insert "  <a style=\"font-size: " 
+    (mapconcat (lambda (tag)
+	    (concat "  <a style=\"font-size: "
 		    (blorg-calc-tag-size (cdr tag))
 		    "%\" href=\"" (concat (car tag) 
 					  (plist-get blorg-strings 
 						     :page-extension)) "\">"
 		    (car tag) "</a> "))
-	  tags)
-    (insert "  \n</div>\n\n")
-    (buffer-string)))
+	  tags "\n"))
 
 
 (defun blorg-render-header-html
