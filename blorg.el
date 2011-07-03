@@ -1698,6 +1698,10 @@ TAG is the set of tags."
   "Insert page-subtitle."
   `(insert blorgv-subtitle))
 
+(defmacro blorg-insert-blog-url nil
+  "Insert URL to this blog."
+  `(insert blorgv-blog-url))
+
 (defmacro blorg-insert-content nil
   "Insert main blorgv-content."
   `(mapc
