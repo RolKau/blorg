@@ -1858,7 +1858,7 @@ and adds a read-mode link."
   (delete-blank-lines)
   (unless (eq (point) (point-max))
     (insert "\n[[./"
-            (blorg-make-post-url blorgv-post-title)
+            (blorg-make-post-url (plist-get post :post-title))
             "]["
             (plist-get blorg-strings :read-more)
             "]]"))
