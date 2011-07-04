@@ -818,8 +818,9 @@ Each cell in this list is a list of the form:
 						  post-author
 						  post-dates
 						  post-tags))
-	  (let ((templ-file (concat blorgv-template-d (format "%s.html" templ-name)))
-			(templ-var  (format "blorg-%s-template" templ-name)))
+	  (let* ((templ-dir  (substitute-in-file-name blorgv-template-d))
+			 (templ-file (concat templ-dir (format "%s.html" templ-name)))
+			 (templ-var  (format "blorg-%s-template" templ-name)))
 		;; if the file exists, read it into buffer and put in variable
 		(when (file-readable-p templ-file)
 		  (with-temp-buffer
