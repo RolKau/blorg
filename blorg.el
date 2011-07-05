@@ -1598,7 +1598,10 @@ TAG is the set of tags."
     (dotimes (cnt (length lst))
       (when (fboundp (intern-soft (nth cnt lst)))
 	(setf (nth cnt lst)
-	      (intern-soft (nth cnt lst))))) lst))
+	      (intern-soft (nth cnt lst))))
+	  (when (equal "" (nth cnt lst)) ; restore set of parenthesis in source
+		(setf (nth cnt lst) "()")))
+	lst))
 
 
 (defun blorg-insert-body (tpl)
