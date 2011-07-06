@@ -264,6 +264,7 @@
     :feed-extension ".xml"
     :meta-robots "index,follow"
     :read-more "Read more"
+	:tags-dir "tag/"
     :time-format "%A, %B %d %Y @ %R %z"
     :title-separator " - ")
   "A list of default strings."
@@ -1374,11 +1375,13 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST are required."
   (tags blorgv-content months-list)
   "Render one page per tag.
 BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST  are required."
-  (let ((blorgv-base-href "./"))
+  (let ((blorgv-base-href "../")) ; tag pages are in their own directory
     (dolist (tag tags)
       (let* ((tag-name (car tag))
-	     (file-name (concat blorgv-publish-d tag-name 
-				(plist-get blorg-strings :page-extension)))
+	     (file-name (concat blorgv-publish-d
+							(plist-get blorg-strings :tags-dir)
+							tag-name 
+							(plist-get blorg-strings :page-extension)))
 	     (ins-tags (memq 'tag blorg-put-tags-in-post))
 	     (ins-auth (memq 'tag blorg-put-author-in-post))
 	     (ins-echos (memq 'tag blorg-put-echos-in-post))
@@ -1492,13 +1495,17 @@ TAG-NAME BLORGV-HEADER BLORGV-CONTENT and FEED-NAME are required."
        new-con feed-name new-tit))))
 
 
+(defun blorg-make-tag-url (tag)
+  "Create an URL that points to the page to a specific tag."
+  (concat blorgv-base-href (plist-get blorg-strings :tags-dir)
+		  (blorg-make-post-url (car tag))))
+
+
 (defun blorg-render-tags-list-html (tags)
   "Render TAGS in a html list."
     (mapconcat (lambda (tag)
 	    (concat "    <li>[" (number-to-string (cdr tag))
-		    "] <a href=\"" blorgv-base-href
-		    (concat (car tag) (plist-get blorg-strings 
-						 :page-extension)) "\">"
+		    "] <a href=\"" (blorg-make-tag-url tag) "\">"
 		    (car tag)
 		    "</a></li>\n"))
 	  tags "\n"))
@@ -1517,9 +1524,7 @@ TAG-NAME BLORGV-HEADER BLORGV-CONTENT and FEED-NAME are required."
     (mapconcat (lambda (tag)
 	    (concat "  <a style=\"font-size: "
 		    (blorg-calc-tag-size (cdr tag))
-		    "%\" href=\"" blorgv-base-href (concat (car tag) 
-					  (plist-get blorg-strings 
-						     :page-extension)) "\">"
+		    "%\" href=\"" (blorg-make-tag-url tag) "\">"
 		    (car tag) "</a> "))
 	  tags "\n"))
 
@@ -1656,7 +1661,7 @@ TAG is the set of tags."
      (cond ((eq site 'technorati)
 	    (concat "<a href=\"http://technorati.com/tag/" 
 		    tag "\">" tag "</a>"))
-	   (t (concat "<a href=\"" blorgv-base-href (blorg-make-post-url tag) 
+	   (t (concat "<a href=\"" (blorg-make-tag-url (cons tag 1)) 
 		      "\">" tag "</a>")))) tags " "))
 
 ;; interleave the ASCII code for a character with some insignificant markup
