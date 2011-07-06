@@ -1319,12 +1319,14 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST are required."
 	     (ins-dates (memq 'index blorg-put-dates-in-post))
 	     (blorgv-ins-full 
 	      (or blorgv-publish-index-only 
-		  (memq 'index blorg-put-full-post))))
+		  (memq 'index blorg-put-full-post)))
+		 (file-name (concat blorgv-publish-d
+							(plist-get blorg-strings :index-page-name)
+							(plist-get blorg-strings :page-extension))))
 	(blorg-insert-body blorg-index-template)
 	(insert "\n</html>")
-	(write-file (concat blorgv-publish-d
-			    (plist-get blorg-strings :index-page-name)
-			    (plist-get blorg-strings :page-extension)))
+	(blorg-make-path file-name)
+	(write-file file-name)
 	(kill-buffer (buffer-name)))))
 
 
@@ -1360,6 +1362,7 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST are required."
 	 ;; Render body
 	  (blorg-insert-body blorg-post-page-template)
 	  (insert "\n</html>")
+	  (blorg-make-path post-file-name)
 	  (write-file post-file-name)
 	  (kill-buffer (buffer-name)))))))
 
@@ -1395,12 +1398,26 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST  are required."
 	   (concat tag-name (plist-get blorg-strings :feed-extension)) tag)
 	  (blorg-insert-body blorg-tag-page-template)
  	  (insert "\n</html>")
+	  (blorg-make-path file-name)
 	  (write-file file-name)
 	  (kill-buffer (buffer-name)))
 	(when (memq 'tag blorg-publish-feed)
 	  (blorg-render-tag-feed
 	   tag-name ctnt
 	   (concat tag-name (plist-get blorg-strings :feed-extension)))))))
+
+
+(defun blorg-make-path (file-name)
+  "Make sure the directories that leads to this filename exists."
+  (let ((dir-name (file-name-directory file-name)))
+	;; root directory of the drive should always exist
+	(if (not (file-accessible-directory-p dir-name))
+		;; remove trailing slash; last directory is now treated as file
+		(let ((dir-as-file (substring dir-name 0 (- (length dir-name) 1))))
+		  ;; create parent directories
+		  (blorg-make-path dir-as-file)
+		  ;; create the last directory in path
+		  (make-directory dir-name)))))
 
 
 (defun blorg-render-month-pages (tags blorgv-content months-list)
@@ -1428,6 +1445,7 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST are required."
 			  month-name))
 	  (blorg-insert-body blorg-month-page-template)
  	  (insert "\n</html>")
+	  (blorg-make-path file-name)
 	  (write-file file-name)
 	  (kill-buffer (buffer-name))))))
 
