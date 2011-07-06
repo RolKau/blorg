@@ -1425,7 +1425,10 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST  are required."
 BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST are required."
     (dolist (month months-list)
       (let* ((month-name (car month))
-	     (file-name (concat blorgv-publish-d (cadr month)))
+			 (file-path (concat blorgv-publish-d (cadr month)))
+			 (file-name (if (equal (file-name-nondirectory file-path) "")
+							(concat file-path "index" (plist-get blorg-strings :page-extension))
+						  file-path))
 	     (ins-tags (memq 'month blorg-put-tags-in-post))
 	     (ins-auth (memq 'month blorg-put-author-in-post))
 	     (ins-echos (memq 'month blorg-put-echos-in-post))
