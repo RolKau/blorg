@@ -1427,13 +1427,10 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST  are required."
 (defun blorg-render-month-pages (tags blorgv-content months-list)
   "Render one page per month.
 BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST are required."
-  (let ((blorgv-base-href "./"))
+  (let ((blorgv-base-href "../../")) ; monthly pages are in YYYY/mm/ subdirectory
     (dolist (month months-list)
       (let* ((month-name (car month))
-			 (file-path (concat blorgv-publish-d (cadr month)))
-			 (file-name (if (equal (file-name-nondirectory file-path) "")
-							(concat file-path "index" (plist-get blorg-strings :page-extension))
-						  file-path))
+			 (file-name (concat blorgv-publish-d (cadr month)))
 	     (ins-tags (memq 'month blorg-put-tags-in-post))
 	     (ins-auth (memq 'month blorg-put-author-in-post))
 	     (ins-echos (memq 'month blorg-put-echos-in-post))
@@ -2004,9 +2001,9 @@ You can give a specific BLORGV-POST-TITLE to this post."
 	  (concat (calendar-month-name month)
 		  " " (number-to-string end-y))
 	  ;; make urls for months
-	  (concat (number-to-string end-y)
-		  (format "%02d" month)
-		  (plist-get blorg-strings :page-extension))
+	  (concat (number-to-string end-y) "/"
+		  (format "%02d" month) "/"
+		  "index" (plist-get blorg-strings :page-extension))
 	  ;; make "2006-05"-like string
 	  (concat (number-to-string end-y)
 		  "-" (format "%02d" month))) t)
