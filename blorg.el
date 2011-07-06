@@ -379,7 +379,7 @@ Allowed symbols are: index tag."
   <meta name=\"keywords\" content=\"(blorg-insert-keyword-list)\" />
   (blorg-insert-robots-instr)
   <meta name=\"author\" content=\"(blorg-insert-author)\" />
-  <link rel=\"stylesheet\" type=\"text/css\" title=\"Default\" media=\"screen\" href=\"(blorg-insert-html-css)\" />
+  <link rel=\"stylesheet\" type=\"text/css\" title=\"Default\" media=\"screen\" href=\"(blorg-base-href)(blorg-insert-html-css)\" />
   (blorg-insert-feed-link)
 </head>
 "
@@ -1151,7 +1151,8 @@ NEW-TITLE is needed to produce tag.xml depending on the tag itself."
   ;; First make sure everything is visible
   (widen)
   (show-all)
-  (let* ((blorgv-feed-file-name
+  (let* ((blorgv-base-href "./")
+		 (blorgv-feed-file-name
 	  (concat blorgv-publish-d 
 		  (or feed-name 
 		      (concat blorgv-feed-type 
@@ -1301,6 +1302,7 @@ NEW-TITLE is the new title.  Er."
   (tags blorgv-content)
   "Render `org-mode' buffer.
 BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST are required."
+  (let ((blorgv-base-href "./")) ; index page is in root directory
     (with-temp-buffer
       (switch-to-buffer (get-buffer-create "*blorg output*"))
       (erase-buffer)
@@ -1327,11 +1329,12 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST are required."
 	(insert "\n</html>")
 	(blorg-make-path file-name)
 	(write-file file-name)
-	(kill-buffer (buffer-name)))))
+	(kill-buffer (buffer-name))))))
 
 
 (defun blorg-render-posts-html (tags blorgv-content)
   "Render posts with TAGS and BLORGV-CONTENT."
+  (let ((blorgv-base-href "./"))
   (let* ((ins-tags (memq 'post blorg-put-tags-in-post))
 	 (ins-auth (memq 'post blorg-put-author-in-post))
 	 (ins-echos (memq 'post blorg-put-echos-in-post))
@@ -1364,13 +1367,14 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST are required."
 	  (insert "\n</html>")
 	  (blorg-make-path post-file-name)
 	  (write-file post-file-name)
-	  (kill-buffer (buffer-name)))))))
+	  (kill-buffer (buffer-name))))))))
 
 
 (defun blorg-render-tags-pages
   (tags blorgv-content months-list)
   "Render one page per tag.
 BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST  are required."
+  (let ((blorgv-base-href "./"))
     (dolist (tag tags)
       (let* ((tag-name (car tag))
 	     (file-name (concat blorgv-publish-d tag-name 
@@ -1404,7 +1408,7 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST  are required."
 	(when (memq 'tag blorg-publish-feed)
 	  (blorg-render-tag-feed
 	   tag-name ctnt
-	   (concat tag-name (plist-get blorg-strings :feed-extension)))))))
+	   (concat tag-name (plist-get blorg-strings :feed-extension))))))))
 
 
 (defun blorg-make-path (file-name)
@@ -1423,6 +1427,7 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST  are required."
 (defun blorg-render-month-pages (tags blorgv-content months-list)
   "Render one page per month.
 BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST are required."
+  (let ((blorgv-base-href "./"))
     (dolist (month months-list)
       (let* ((month-name (car month))
 			 (file-path (concat blorgv-publish-d (cadr month)))
@@ -1450,13 +1455,13 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST are required."
  	  (insert "\n</html>")
 	  (blorg-make-path file-name)
 	  (write-file file-name)
-	  (kill-buffer (buffer-name))))))
+	  (kill-buffer (buffer-name)))))))
 
 
 (defun blorg-render-archives-list-html (months-list)
   "Render MONTHS-LIST into an html list with CLASS."
 	  (mapconcat (lambda (mth)
-		       (concat "    <li><a href=\"" (cadr mth) "\">"
+		       (concat "    <li><a href=\"" blorgv-base-href (cadr mth) "\">"
 			       (car mth) "</a></li>"))
 		     months-list "\n"))
 
@@ -1465,7 +1470,7 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST are required."
   "Render a list containing PREVIOUS-POSTS."
     (when previous-posts
 	  (mapconcat (lambda (post)
-	    (concat "  <li><a href=\""
+	    (concat "  <li><a href=\"" blorgv-base-href
 		    (blorg-make-post-url
 		     (plist-get post :post-title))
 		    "\">" (plist-get post :post-title)
@@ -1494,7 +1499,7 @@ TAG-NAME BLORGV-HEADER BLORGV-CONTENT and FEED-NAME are required."
   "Render TAGS in a html list."
     (mapconcat (lambda (tag)
 	    (concat "    <li>[" (number-to-string (cdr tag))
-		    "] <a href=\""
+		    "] <a href=\"" blorgv-base-href
 		    (concat (car tag) (plist-get blorg-strings 
 						 :page-extension)) "\">"
 		    (car tag)
@@ -1515,7 +1520,7 @@ TAG-NAME BLORGV-HEADER BLORGV-CONTENT and FEED-NAME are required."
     (mapconcat (lambda (tag)
 	    (concat "  <a style=\"font-size: "
 		    (blorg-calc-tag-size (cdr tag))
-		    "%\" href=\"" (concat (car tag) 
+		    "%\" href=\"" blorgv-base-href (concat (car tag) 
 					  (plist-get blorg-strings 
 						     :page-extension)) "\">"
 		    (car tag) "</a> "))
@@ -1654,7 +1659,7 @@ TAG is the set of tags."
      (cond ((eq site 'technorati)
 	    (concat "<a href=\"http://technorati.com/tag/" 
 		    tag "\">" tag "</a>"))
-	   (t (concat "<a href=\"" (blorg-make-post-url tag) 
+	   (t (concat "<a href=\"" blorgv-base-href (blorg-make-post-url tag) 
 		      "\">" tag "</a>")))) tags " "))
 
 ;; interleave the ASCII code for a character with some insignificant markup
@@ -1687,8 +1692,9 @@ TAG is the set of tags."
 ;;; Macros
 (defmacro blorg-insert-index-url nil
   "Insert index url."
-  `(insert (concat (plist-get blorg-strings :index-page-name)
-		   (plist-get blorg-strings :page-extension))))
+  `(insert (concat blorgv-base-href
+				   (plist-get blorg-strings :index-page-name)
+				   (plist-get blorg-strings :page-extension))))
 
 (defmacro blorg-insert-tag-name nil
   "Insert tag-name."
@@ -1767,7 +1773,7 @@ TAG is the set of tags."
 
 (defmacro blorg-insert-post-url nil
   "Insert full url of the post."
-  `(insert blorgv-post-rel-url))
+  `(insert blorgv-base-href blorgv-post-rel-url))
 
 (defmacro blorg-insert-post-publication-date nil
   "Insert publication date of the post."
@@ -1781,6 +1787,9 @@ TAG is the set of tags."
   "Insert tags of the post."
   `(insert blorgv-tags-links))
 
+(defmacro blorg-base-href nil
+  "Insert relative path necessary to get to blog root."
+  `(insert blorgv-base-href))
 
 ;; Don't put this as a default in templates
 (defmacro blorg-insert-this-post-tags-to-technorati nil
@@ -1881,7 +1890,7 @@ and adds a read-mode link."
   (forward-paragraph blorg-parg-in-headlines)
   (delete-blank-lines)
   (unless (eq (point) (point-max))
-    (insert "\n[[./"
+    (insert "\n[[" blorgv-base-href
             (blorg-make-post-url (plist-get post :post-title))
             "]["
             (plist-get blorg-strings :read-more)
@@ -1944,7 +1953,7 @@ When FULL render full blorgv-content, otherwise just insert some headlines."
 															  raw-rel-link))))
 				  (blorg-cp-if-newer src-f dst-f))
 				;; rewrite with link to new directory.
-				(replace-match (concat "[[./" sub-d raw-rel-link
+				(replace-match (concat "[[" blorgv-base-href sub-d raw-rel-link
 									   (if link-desc (concat "][" link-desc))
 									   "]]"))))))))))
 
