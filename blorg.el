@@ -1587,7 +1587,7 @@ TAG is the set of tags."
 	    ((not (eq (car (split-char (char-after))) 'ascii))
 	     (delete-char 1))
 	    (t (forward-char 1))))
-    (concat (replace-regexp-in-string "-+$" "" (buffer-string))
+    (concat (replace-regexp-in-string "-+$" "" (downcase (buffer-string)))
 	    (plist-get blorg-strings :page-extension))))
 
 
