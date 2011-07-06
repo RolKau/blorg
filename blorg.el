@@ -1211,7 +1211,7 @@ NEW-TITLE is the new title.  Er."
 (defun blorg-render-header-rss
   (title)
   "Render header in rss format for TITLE."
-  (insert "<?xml version=\"1.0\" blorgv-encoding=\"" blorgv-encoding "\"?>
+  (insert "<?xml version=\"1.0\" encoding=\"" blorgv-encoding "\"?>
 <rss version=\"2.0\">
   <channel>
     <title>" title "</title>
