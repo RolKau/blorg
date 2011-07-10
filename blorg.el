@@ -904,8 +904,7 @@ Each cell in this list is a list of the form:
 ;; 	 (directory-files blorgv-publish-d nil "\..+ml"))
 ;; 	(posts-files (mapcar 
 ;; 		      (lambda (post)
-;; 			(blorg-make-post-url 
-;; 			 (plist-get post :post-title)))
+;; 			(blorg-make-post-url post))
 ;; 		      blorgv-content)))
 ;;     (dolist (file (cddr existing-files))
 ;;       (when (not (member file posts-files))
@@ -1235,7 +1234,7 @@ NEW-TITLE is the new title.  Er."
 			  (blorg-timestamp-to-rfc822
 			   (plist-get post :post-updated))))
 	 (blorgv-content (plist-get post :post-content))
-	 (blorgv-post-rel-url (blorg-make-post-url blorgv-post-title))
+	 (blorgv-post-rel-url (blorg-make-post-url post))
 	 (post-number (plist-get post :post-number)))
     (switch-to-buffer (get-buffer-create "*blorg feed output*"))
     (goto-char (point-max))
@@ -1345,7 +1344,7 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST are required."
 	     (post-tags
 	      (mapconcat 'eval (delete "" (split-string (plist-get ctnt0 :post-tags) ":")) " "))
 	     (post-file-name
-	      (concat blorgv-publish-d (blorg-make-post-url blorgv-post-title))))
+	      (concat blorgv-publish-d (blorg-make-post-url ctnt0))))
 	(with-temp-buffer
 	  (switch-to-buffer (get-buffer-create "*blorg output*"))
 	  (erase-buffer)
@@ -1466,8 +1465,7 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST are required."
     (when previous-posts
 	  (mapconcat (lambda (post)
 	    (concat "  <li><a href=\"" blorgv-base-href
-		    (blorg-make-post-url
-		     (plist-get post :post-title))
+		    (blorg-make-post-url post)
 		    "\">" (plist-get post :post-title)
 		    "</a></li>\n"))
 	  (blorg-limit-content-to-number
@@ -1550,7 +1548,7 @@ TAG is the set of tags."
 (defun blorg-render-content-html (post blorgv-blog-url)
   "Render POST in html with BLORGV-BLOG-URL."
   (let* ((blorgv-post-raw-title (plist-get post :post-title))
-	 (blorgv-post-rel-url (blorg-make-post-url blorgv-post-raw-title))
+	 (blorgv-post-rel-url (blorg-make-post-url post))
 	 (blorgv-post-title (blorg-escape blorgv-post-raw-title 'entity))
 	 (post-abs-url (concat blorgv-blog-url blorgv-post-rel-url))
 	 (tags (delete "" (split-string (plist-get post :post-tags) ":")))
@@ -1566,9 +1564,9 @@ TAG is the set of tags."
     (blorg-insert-body blorg-post-template)))
 
 
-(defun blorg-make-post-url (blorgv-post-title)
-  "Make a permanent url from BLORGV-POST-TITLE."
-  (blorg-format-url blorgv-post-title))
+(defun blorg-make-post-url (post)
+  "Make a permanent url from POST."
+  (blorg-format-url (plist-get post :post-title)))
 
 
 (defun blorg-format-url (blorgv-post-title)
@@ -1893,7 +1891,7 @@ and adds a read-mode link."
   (delete-blank-lines)
   (unless (eq (point) (point-max))
     (insert "\n[[" blorgv-base-href
-            (blorg-make-post-url (plist-get post :post-title))
+            (blorg-make-post-url post)
             "]["
             (plist-get blorg-strings :read-more)
             "]]"))
