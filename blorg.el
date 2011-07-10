@@ -1074,28 +1074,23 @@ REVERSE posts order is necessary."
 				(re-search-forward "^\\* " nil t)) t))
 			   (match-string-no-properties 1))
 			 (format-time-string (cdr blorgv-time-stamp-formats)))
-			 t))
-	       (post-exists 
-		(file-exists-p (concat blorgv-publish-d 
-				       (blorg-make-post-url ttle)))))
+			 t)))
 	  (add-to-list 'posts
 		       (blorg-parse-post
 			cnt ttle tgs dte
 			(if (save-excursion
 			      (re-search-forward "^\\* " nil t))
 			    (match-beginning 0)
-			  (point-max))
-			post-exists) t)
+			  (point-max))) t)
 	  (setq cnt (1+ cnt)))))
     (if reverse (reverse posts) posts)))
 
 
-(defun blorg-parse-post (number title tags dte end exists)
+(defun blorg-parse-post (number title tags dte end)
   "Parse post NUMBER with TITLE and TAGS from DATE ending at END."
   `(:post-number ,number
     :post-title ,(blorg-strip-trailing-spaces title)
     :post-tags ,tags
-    :post-exists ,exists
     :post-closed ,dte
     :post-updated ,(current-time)
     :post-content ,(blorg-get-post-content end)))
