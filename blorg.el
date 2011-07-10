@@ -1498,7 +1498,7 @@ TAG-NAME BLORGV-HEADER BLORGV-CONTENT and FEED-NAME are required."
 (defun blorg-make-tag-url (tag)
   "Create an URL that points to the page to a specific tag."
   (concat blorgv-base-href (plist-get blorg-strings :tags-dir)
-		  (blorg-make-post-url (car tag))))
+		  (blorg-format-url (car tag))))
 
 
 (defun blorg-render-tags-list-html (tags)
@@ -1573,6 +1573,11 @@ TAG is the set of tags."
 
 (defun blorg-make-post-url (blorgv-post-title)
   "Make a permanent url from BLORGV-POST-TITLE."
+  (blorg-format-url blorgv-post-title))
+
+
+(defun blorg-format-url (blorgv-post-title)
+  "Helper routine to format a title into an URL."
   (with-temp-buffer
     (insert blorgv-post-title)
     (goto-char (point-min))
