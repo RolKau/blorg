@@ -1329,7 +1329,7 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST are required."
 
 (defun blorg-render-posts-html (tags blorgv-content)
   "Render posts with TAGS and BLORGV-CONTENT."
-  (let ((blorgv-base-href "./"))
+  (let ((blorgv-base-href "../../")) ; posts are now in month directory
   (let* ((ins-tags (memq 'post blorg-put-tags-in-post))
 	 (ins-auth (memq 'post blorg-put-author-in-post))
 	 (ins-echos (memq 'post blorg-put-echos-in-post))
@@ -1566,7 +1566,12 @@ TAG is the set of tags."
 
 (defun blorg-make-post-url (post)
   "Make a permanent url from POST."
-  (blorg-format-url (plist-get post :post-title)))
+  (let* ((closed-time (plist-get post :post-closed))
+		 (closed-year (nth 5 (decode-time closed-time)))
+		 (closed-month (nth 4 (decode-time closed-time)))
+		 (month-path (format "%4d/%02d/" closed-year closed-month))
+		 (file-name (blorg-format-url (plist-get post :post-title))))
+	(concat month-path file-name)))
 
 
 (defun blorg-format-url (blorgv-post-title)
