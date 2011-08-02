@@ -897,6 +897,29 @@ Each cell in this list is a list of the form:
   (when (get-buffer "*blorg feed output*")
     (kill-buffer "*blorg feed output*")))
 
+(defun blorg-buffer-hash ()
+  "Hash of current buffer."
+  (md5 (current-buffer) nil nil 'no-conversion))
+
+(defun blorg-file-hash (filename)
+  "Hash of FILENAME used to test for equality, or nil if FILENAME not written yet."
+  (when (file-readable-p filename)
+	(with-temp-buffer
+	  (insert-file-contents filename)
+	  (blorg-buffer-hash))))
+
+(defun blorg-file-changed (filename)
+  "Compare current buffer with FILENAME and see if they have different content."
+  (let ((buf-hash (save-excursion (blorg-buffer-hash)))
+		(file-hash (blorg-file-hash filename)))
+	(not (string= buf-hash file-hash))))
+
+(defun blorg-write-file (filename)
+  "Save current buffer to FILENAME if it has changed."
+  (when (blorg-file-changed filename)
+	(blorg-make-path filename)
+	(write-file filename)))
+
 ;;; TO BE TESTED
 ;; (defun blorg-maybe-clean-orphan-files (blorgv-content)
 ;;   "Delete all html and xml files but those which won't be republished."
@@ -1164,8 +1187,8 @@ NEW-TITLE is needed to produce tag.xml depending on the tag itself."
 	      content)
       (if (equal blorgv-feed-type "rss")
 	  (insert "  </channel>\n</rss>")
-	(insert "</feed>\n"))
-      (write-file blorgv-feed-file-name)
+	  (insert "</feed>\n"))
+	  (blorg-write-file blorgv-feed-file-name)
       (kill-buffer (buffer-name)))))
 
 
@@ -1322,8 +1345,7 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST are required."
 							(plist-get blorg-strings :page-extension))))
 	(blorg-insert-body blorg-index-template)
 	(insert "\n</html>\n")
-	(blorg-make-path file-name)
-	(write-file file-name)
+	(blorg-write-file file-name)
 	(kill-buffer (buffer-name))))))
 
 
@@ -1360,8 +1382,7 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST are required."
 	 ;; Render body
 	  (blorg-insert-body blorg-post-page-template)
 	  (insert "\n</html>\n")
-	  (blorg-make-path post-file-name)
-	  (write-file post-file-name)
+	  (blorg-write-file post-file-name)
 	  (kill-buffer (buffer-name))))))))
 
 
@@ -1399,8 +1420,7 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST  are required."
 	   (concat tag-name (plist-get blorg-strings :feed-extension)) tag)
 	  (blorg-insert-body blorg-tag-page-template)
 	  (insert "\n</html>\n")
-	  (blorg-make-path file-name)
-	  (write-file file-name)
+	  (blorg-write-file file-name)
 	  (kill-buffer (buffer-name)))
 	(when (memq 'tag blorg-publish-feed)
 	  (blorg-render-tag-feed
@@ -1447,8 +1467,7 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST are required."
 			  month-name))
 	  (blorg-insert-body blorg-month-page-template)
 	  (insert "\n</html>\n")
-	  (blorg-make-path file-name)
-	  (write-file file-name)
+	  (blorg-write-file file-name)
 	  (kill-buffer (buffer-name)))))))
 
 
