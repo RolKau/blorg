@@ -1959,6 +1959,7 @@ When FULL render full blorgv-content, otherwise just insert some headlines."
 				(raw-link (match-string 3))
 				(link-desc (match-string 5)))
 			;; local files only
+			;; internal refs should be written with a path only, no protocol
 			(when (equal url-type "file")
 			  ;; image file?
 			  (let* ((raw-rel-link (file-name-nondirectory raw-link))
