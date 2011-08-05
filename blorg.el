@@ -815,6 +815,8 @@ Each cell in this list is a list of the form:
 	(dolist (templ-name '(head
 						  index
 						  post-page
+						  month-page
+						  tag-page
 						  post
 						  post-author
 						  post-dates
@@ -827,10 +829,7 @@ Each cell in this list is a list of the form:
 		  (with-temp-buffer
 			(insert-file-contents templ-file nil nil nil t)
 			(set (intern templ-var) (buffer-string))
-			(message "Loaded %s from \"%s\"" templ-var templ-file)))))
-	;; reuse the index page for tag page, monthly page and post-page
-	(setq blorg-tag-page-template blorg-index-template)
-	(setq blorg-month-page-template blorg-index-template)))
+			(message "Loaded %s from \"%s\"" templ-var templ-file)))))))
 
 ;;;###autoload
 (defun blorg-publish ()

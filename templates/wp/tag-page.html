@@ -1,0 +1,60 @@
+  <body onLoad="body_Load();">
+	<div id="wrap">
+	  <div id="container" class="one-column">
+		<div id="header">
+		  <div class="banner"></div>
+		  <div id="caption">
+			<h1 id="title"><a href="(blorg-insert-index-url)">(blorg-insert-page-title)</a></h1>
+			<div id="tagline">(blorg-insert-page-subtitle)</div>
+		  </div>
+		  <div class="fixed"></div>
+		</div>
+		<div id="navigation">
+		  <ul id="menus">
+			<li class="current_page_item"><a class="home" title="Home" href="(blorg-insert-index-url)">Home</a></li>
+			<li><a class="lastmenu" href="javascript:void(0);"></a></li>
+		  </ul><!-- menus -->
+		  <div id="searchbox">
+			<form action="http://www.google.com/search" method="get">
+			  <div class="content">
+				<input type="hidden" name="prmd" value="n" />
+				<input type="hidden" name="q" value="site:(blorg-insert-blog-url)" />
+				<input type="text" class="textfield" name="q" size="24" />
+				<input type="submit" class="button" value="" />
+			  </div>
+			</form>
+		  </div><!-- searchbox -->
+		  <div class="fixed"></div>
+		</div><!-- navigation -->
+		<div id="content">
+		  <div id="main">
+			<div class="boxcaption"><h3>Archive</h3></div>
+			<div class="box">Posts Tagged &lsquo;(blorg-insert-tag-name)&rsquo;</div>
+			<!--div class="post" id="notice">
+			  <div class="content">
+				<div class="fixed"></div>
+			  </div>
+			</div--><!-- notice -->
+			(blorg-insert-content)
+			<!-- div class="errorbox"></div-->
+			<!--div id="pagenavi">
+			  <span class="newer">Newer entries</span>
+			  <span class="older">Older entries</span>
+			  <div class="fixed"></div>
+			</div--><!-- pagenavi -->
+		  </div><!-- main -->
+		  <div class="fixed"></div>
+		</div><!-- content -->
+		<div id="footer">
+		  <a id="gotop" href="#" onclick="MGJS.goTop();return false;">Top</a>
+		  <div id="copyright">
+			Copyright &copy; (blorg-insert-author)
+		  </div><!-- copyright -->
+		  <div id="themeinfo">
+		  <!-- Theme xxx by yyy. -->
+		  </div>
+		</div><!-- footer -->
+	  </div><!-- container -->
+	</div><!-- wrap -->
+  </body>
+</html>
