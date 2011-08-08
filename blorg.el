@@ -76,6 +76,7 @@
 ;; #+UPLOAD_DIR  : relative upload directory name
 ;; #+IMAGES_DIR  : relative images directory name
 ;; #+CONFIG_FILE : elisp config file for this blog
+;; #+TEMPLATE_DIR: directory from which to fetch external templates
 ;;
 ;; Other informations::
 ;; #+CREATED     : <%Y-%m-%d>
