@@ -87,6 +87,10 @@
 ;; #+XML_CSS     : stylesheet URL for xml feeds
 ;; #+FEED_TYPE   : atom or rss (which is rss 2.0 by default)
 ;; #+DONE_STRING : (maybe special) DONE string
+;;
+;; Optional keys:
+;; #+DISQUS      : active Disqus threads and set identifier for the site
+;;                 (shortname at <http://disqus.com/admin/register/>)
 ;; 
 ;; See M-x `customize-group' RET `blorg' for further details.
 ;;
@@ -166,6 +170,7 @@
 (defvar blorgv-publish-d "~/public_html/")
 (defvar blorgv-images-d "upload/")
 (defvar blorgv-upload-d "images/")
+(defvar blorgv-disqus-id nil)
 
 ;;; Set aliases, keys, constants, advicest
 (define-key org-mode-map "\C-c\"" 'blorg-publish)
@@ -200,6 +205,7 @@
 	(:template-dir "^#\\+TEMPLATE_DIR:[ \t]+\\(.+\\)$")
     (:upload-dir "^#\\+UPLOAD_DIR:[ \t]+\\(.+\\)$")
     (:images-dir "^#\\+IMAGES_DIR:[ \t]+\\(.+\\)$")
+	(:disqus-id "^#\\+DISQUS:[ \t]+\\(.+\\)$")
     (:config-file "^#\\+CONFIG_FILE:[ \t]+\\(.+\\)$"))
     "Alist of options and matching regexps.")
 
@@ -265,6 +271,8 @@
     :feed-extension ".xml"
     :meta-robots "index,follow"
     :read-more "Read more"
+	:comments-off "Comments off"
+	:view-comments "View comments"
 	:tags-dir "tag/"
     :time-format "%A, %B %d %Y @ %R %z"
     :title-separator " - ")
@@ -291,6 +299,7 @@
     :number-of-posts "12"
     :publish-dir "~/public_html/"
 	:template-dir nil
+	:disqus-id nil
     :upload-dir "upload/"
     :images-dir "images/")
   "A list of default options.
@@ -802,6 +811,7 @@ Each cell in this list is a list of the form:
 	blorgv-upload-d (plist-get blorgv-header :upload-dir)
 	blorgv-images-d (plist-get blorgv-header :images-dir)
 	blorgv-keywords (plist-get blorgv-header :keywords)
+	blorgv-disqus-id (plist-get blorgv-header :disqus-id)
 	blorgv-feed-type (plist-get blorgv-header :feed-type)))
 
 (defun blorg-set-time-formats nil
@@ -1324,7 +1334,7 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST are required."
     (with-temp-buffer
       (switch-to-buffer (get-buffer-create "*blorg output*"))
       (erase-buffer)
-      (blorg-render-header-html blorgv-header blorgv-blog-title
+      (blorg-render-header-html blorgv-header blorgv-blog-title nil
        (if (equal blorgv-feed-type "atom")
 	   "atom.xml" "rss.xml"))
       (let* ((ctnt (blorg-limit-content-to-number 
@@ -1365,8 +1375,8 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST are required."
 	     (blorgv-published (blorg-timestamp-to-readable (plist-get ctnt0 :post-closed)))
 	     (post-tags
 	      (mapconcat 'eval (delete "" (split-string (plist-get ctnt0 :post-tags) ":")) " "))
-	     (post-file-name
-	      (concat blorgv-publish-d (blorg-make-post-url ctnt0))))
+		 (blorgv-post-rel-url (blorg-make-post-url ctnt0))
+	     (post-file-name (concat blorgv-publish-d blorgv-post-rel-url)))
 	(with-temp-buffer
 	  (switch-to-buffer (get-buffer-create "*blorg output*"))
 	  (erase-buffer)
@@ -1378,7 +1388,7 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST are required."
 	  (plist-put blorgv-header :tp-keywords (concat post-keywords " " post-tags))
 	  ;; Render blorgv-header
 	  (blorg-render-header-html 
-	   blorgv-header (plist-get blorgv-header :tp-title))
+	   blorgv-header (plist-get blorgv-header :tp-title) t)
 	 ;; Render body
 	  (blorg-insert-body blorg-post-page-template)
 	  (insert "\n</html>\n")
@@ -1416,7 +1426,7 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST  are required."
 	  (blorg-render-header-html
 	   blorgv-header (concat blorgv-blog-title (plist-get blorg-strings 
 						:title-separator)
-			  tag-name)
+			  tag-name) nil
 	   (concat tag-name (plist-get blorg-strings :feed-extension)) tag)
 	  (blorg-insert-body blorg-tag-page-template)
 	  (insert "\n</html>\n")
@@ -1464,7 +1474,7 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST are required."
 	  (blorg-render-header-html
 	   blorgv-header (concat blorgv-blog-title 
 			  (plist-get blorg-strings :title-separator)
-			  month-name))
+			  month-name) nil)
 	  (blorg-insert-body blorg-month-page-template)
 	  (insert "\n</html>\n")
 	  (blorg-write-file file-name)
@@ -1542,9 +1552,10 @@ TAG-NAME BLORGV-HEADER BLORGV-CONTENT and FEED-NAME are required."
 
 
 (defun blorg-render-header-html
-  (blorgv-header page-title &optional feed-url tag)
+  (blorgv-header page-title single? &optional feed-url tag)
   "Render BLORGV-HEADER.
 If PAGE-TITLE give a specific title to this page.
+SINGLE? tells if this is a single post or an index page.
 FEED-URL is the complete url for the feed page.
 TAG is the set of tags."
   (let ((keywords
@@ -1888,6 +1899,36 @@ TAG is the set of tags."
   <link rel=\"alternate\" type=\"application/" blorgv-feed-type
   "+xml\" title=\"" page-title "\" href=\""
   feed-url "\" />")))
+
+(defmacro blorg-insert-disqus-header ()
+  "Include Disqus scripts."
+  `(when blorgv-disqus-id
+	 ;; configuration
+	 (insert "<script type=\"text/javascript\">
+       var disqus_developer = 1;
+       var disqus_shortname = '" blorgv-disqus-id "';")
+	 (when single? (insert "
+	   var disqus_identifier = '" blorgv-post-rel-url "';
+       var disqus_url = '" (concat blorgv-blog-url blorgv-post-rel-url) "';"))
+	 (insert "</script>")
+	 ;; external functions which do the heavy lifting
+	 (insert "<script type=\"text/javascript\" async=\"true\" src=\"http://"
+			 blorgv-disqus-id
+			 ".disqus.com/" (if single? "embed" "count") ".js\"></script>")))
+
+(defmacro blorg-insert-disqus-count-and-link ()
+  "Insert the number of comments to the current article."
+  `(if blorgv-disqus-id
+	   (insert "<a href=\"" blorgv-post-rel-url "#disqus-thread\" "
+			   "data-disqus-identifier=\"" blorgv-post-rel-url "\">"
+			   (plist-get blorg-strings :view-comments)
+			   "</a>")
+	 (insert (plist-get blorg-strings :comments-off))))
+
+(defmacro blorg-insert-disqus-comments ()
+  "Insert division where comments will appear."
+  `(when blorgv-disqus-id (insert "
+  <div id=\"disqus_thread\"></div>")))
 
 ;;; Exporting to HTML
 (defconst blorg-special-html-chars
