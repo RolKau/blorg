@@ -893,7 +893,8 @@ Each cell in this list is a list of the form:
 	;; always publish index
 	(blorg-render-index tags blorgv-content)
 	(when (memq 'index blorg-publish-feed)
-	  (blorg-render-feed blorgv-content))
+	  (let ((blorgv-base-href "./"))
+		(blorg-render-feed blorgv-content)))
 	(when (memq 'tag blorg-publish-page-type)
 	  (blorg-render-tags-pages
 	   tags blorgv-content months-list))
@@ -1179,8 +1180,7 @@ NEW-TITLE is needed to produce tag.xml depending on the tag itself."
   ;; First make sure everything is visible
   (widen)
   (show-all)
-  (let* ((blorgv-base-href "./")
-		 (blorgv-feed-file-name
+  (let* ((blorgv-feed-file-name
 	  (concat blorgv-publish-d 
 		  (or feed-name 
 		      (concat blorgv-feed-type 
@@ -1433,9 +1433,11 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST  are required."
 	  (blorg-write-file file-name)
 	  (kill-buffer (buffer-name)))
 	(when (memq 'tag blorg-publish-feed)
-	  (blorg-render-tag-feed
-	   tag-name ctnt
-	   (concat tag-name (plist-get blorg-strings :feed-extension))))))))
+	  (let ((blorgv-base-href "../"))
+			(blorg-render-tag-feed
+			 tag-name ctnt
+			 (concat (plist-get blorg-strings :tags-dir)
+					 tag-name (plist-get blorg-strings :feed-extension)))))))))
 
 
 (defun blorg-make-path (file-name)
