@@ -77,6 +77,7 @@
 ;; #+IMAGES_DIR  : relative images directory name
 ;; #+CONFIG_FILE : elisp config file for this blog
 ;; #+TEMPLATE_DIR: directory from which to fetch external templates
+;; #+THEME_DIR   : directory from which to fetch stylesheets
 ;;
 ;; Other informations::
 ;; #+CREATED     : <%Y-%m-%d>
@@ -167,6 +168,7 @@
 (defvar blorgv-ins-full nil)
 (defvar blorgv-tags-links nil)
 (defvar blorgv-template-d nil)
+(defvar blorgv-theme-d nil)
 (defvar blorgv-publish-d "~/public_html/")
 (defvar blorgv-images-d "upload/")
 (defvar blorgv-upload-d "images/")
@@ -203,6 +205,7 @@
     (:done-string "^#\\+DONE_STRING:[ \t]+\\(.+\\)$")
     (:publish-dir "^#\\+PUBLISH_DIR:[ \t]+\\(.+\\)$")
 	(:template-dir "^#\\+TEMPLATE_DIR:[ \t]+\\(.+\\)$")
+	(:theme-dir "^#\\+THEME_DIR:[ \t]+\\(.+\\)$")
     (:upload-dir "^#\\+UPLOAD_DIR:[ \t]+\\(.+\\)$")
     (:images-dir "^#\\+IMAGES_DIR:[ \t]+\\(.+\\)$")
 	(:disqus-id "^#\\+DISQUS:[ \t]+\\(.+\\)$")
@@ -299,6 +302,7 @@
     :number-of-posts "12"
     :publish-dir "~/public_html/"
 	:template-dir nil
+	:theme-dir nil
 	:disqus-id nil
     :upload-dir "upload/"
     :images-dir "images/")
@@ -807,6 +811,7 @@ Each cell in this list is a list of the form:
 	blorgv-done-string (or (plist-get blorgv-header :done-string) "DONE") 
 ;;	(car (reverse (split-string (plist-get blorgv-header :seq-todo)))))
 	blorgv-template-d (plist-get blorgv-header :template-dir)
+	blorgv-theme-d (plist-get blorgv-header :theme-dir)
 	blorgv-publish-d (plist-get blorgv-header :publish-dir)
 	blorgv-upload-d (plist-get blorgv-header :upload-dir)
 	blorgv-images-d (plist-get blorgv-header :images-dir)
@@ -876,14 +881,9 @@ Each cell in this list is a list of the form:
     ;;; Create directories
     (blorg-maybe-create-directories
      blorgv-publish-d blorgv-images-d blorgv-upload-d)
-	;; Copy stylesheets from template to publish directory
-	(when blorgv-template-d
-	  (dolist (which-ml '(:html-css :xml-css))
-		(let ((css-name (plist-get blorgv-header which-ml)))
-		  (when css-name
-			(let ((src-f (concat blorgv-template-d css-name))
-				  (dst-f (concat blorgv-publish-d css-name)))
-			  (blorg-cp-if-newer src-f dst-f))))))
+	;; Copy stylesheets from theme to publish directory
+	(when blorgv-theme-d
+	  (blorg-cp-R (substitute-in-file-name blorgv-theme-d) blorgv-publish-d))
     ;; Maybe clean orphan files
 ;;    (blorg-maybe-clean-orphan-files blorgv-content)
     (save-window-excursion
@@ -1071,6 +1071,7 @@ Each element of the list is a cons: (\"tag-name\" . number)."
 	    (if (or ; Add blorgv-homepage ?
 		 (eq (car option) :blog-url)
 		 (eq (car option) :template-dir)
+		 (eq (car option) :theme-dir)
 		 (eq (car option) :publish-dir)
 		 (eq (car option) :images-dir)
 		 (eq (car option) :upload-dir))
@@ -2027,11 +2028,46 @@ When FULL render full blorgv-content, otherwise just insert some headlines."
 
 (defun blorg-cp-if-newer (src-f dst-f)
   "Copy SRC-F to DST-F if the latter does not exist or is older."
+  (if (file-readable-p src-f)
+	  (if (or (not (file-exists-p dst-f))
+			  (file-newer-than-file-p src-f dst-f))
+		  (eshell/cp src-f dst-f))))
+
+(defun blorg-cp-R* (src-dir dst-dir file)
+  "Copies file from src-dir to dst-dir. Both src-dir and dst-dir must be
+proper directory names, i.e. end with a slash. Use blank file if you
+want to copy the entire directory."
+  ;; full path for both source and destination
+  (let ((src-file (concat src-dir file))
+		(dst-file (concat dst-dir file)))
+	;; recurse if we are copying a directory
+	(if (file-accessible-directory-p src-file)
+		(let* ((src-path (file-name-as-directory src-file))
+			   (dst-path (file-name-as-directory dst-file))
+			   ;; enumerate all files in the source directory
+			   (abs-files (file-expand-wildcards (concat src-path "*")))
+			   (rel-files (mapcar
+						   '(lambda (path) (substring path (length src-path)))
+						   abs-files)))
+		  ;; copy all files recursively
+		  (when (not (file-accessible-directory-p dst-file))
+			(make-directory dst-file))
+		  (mapcar '(lambda (file) (blorg-cp-R* src-path dst-path file)) rel-files))
+	  ;; base case: only copying a single file
+	  (blorg-cp-if-newer src-file dst-file))))
+
+(defun blorg-cp-R (src dst)
+  "Copy src to dst, recursively if src is a directory. dst must always 
+be the target directory, i.e. renames are not supported."
   (save-match-data
-	(if (file-readable-p src-f)
-		(if (or (not (file-exists-p dst-f))
-				(file-newer-than-file-p src-f dst-f))
-			(eshell/cp src-f dst-f)))))
+	(if (file-accessible-directory-p src)
+		(blorg-cp-R* (file-name-as-directory src)
+					 (file-name-as-directory dst)
+					 "")
+	  ;; one file only
+	  (blorg-cp-R* (file-name-directory src)
+				   (file-name-as-directory dst)
+				   (file-name-nondirectory src)))))
 
 (defun blorg-trim-leading-and-trailing-lines ()
   (save-excursion
