@@ -77,7 +77,9 @@
 ;; #+IMAGES_DIR  : relative images directory name
 ;; #+CONFIG_FILE : elisp config file for this blog
 ;; #+TEMPLATE_DIR: directory from which to fetch external templates
+;;                 (use caret to refer to blorg-directory)
 ;; #+THEME_DIR   : directory from which to fetch stylesheets
+;;                 (use caret to refer to blorg-directory)
 ;;
 ;; Other informations::
 ;; #+CREATED     : <%Y-%m-%d>
@@ -825,6 +827,16 @@ Each cell in this list is a list of the form:
       (setq blorgv-time-stamp-formats org-time-stamp-custom-formats)
     (setq blorgv-time-stamp-formats org-time-stamp-formats)))
 
+;; name of the directory in which the current file is loaded
+(defconst blorg-dir (directory-file-name
+					 (file-name-directory
+					  (or load-file-name buffer-file-name))))
+
+(defun blorg-substitute-in-file-name (path)
+  "Allow environment variables and caret as shortcut in path."
+  ;; caret is shortcut for the directory that contains blorg.el
+  (substitute-in-file-name (replace-regexp-in-string "^\\^" blorg-dir path)))
+
 (defun blorg-load-templates-dir (blorgv-template-d)
   (when blorgv-template-d
 	;; read each of these templates
@@ -837,7 +849,7 @@ Each cell in this list is a list of the form:
 						  post-author
 						  post-dates
 						  post-tags))
-	  (let* ((templ-dir  (substitute-in-file-name blorgv-template-d))
+	  (let* ((templ-dir  (blorg-substitute-in-file-name blorgv-template-d))
 			 (templ-file (concat templ-dir (format "%s.html" templ-name)))
 			 (templ-var  (format "blorg-%s-template" templ-name)))
 		;; if the file exists, read it into buffer and put in variable
@@ -883,7 +895,7 @@ Each cell in this list is a list of the form:
      blorgv-publish-d blorgv-images-d blorgv-upload-d)
 	;; Copy stylesheets from theme to publish directory
 	(when blorgv-theme-d
-	  (blorg-cp-R (substitute-in-file-name blorgv-theme-d) blorgv-publish-d))
+	  (blorg-cp-R (blorg-substitute-in-file-name blorgv-theme-d) blorgv-publish-d))
     ;; Maybe clean orphan files
 ;;    (blorg-maybe-clean-orphan-files blorgv-content)
     (save-window-excursion
