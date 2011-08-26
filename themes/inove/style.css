@@ -18,7 +18,7 @@ abbr[title], acronym[title] {
 	cursor:help;
 }
 body {
-	background:#BEC3C6 url(img/bg.jpg) repeat-x;
+	background:#BEC3C6 url(images/bg.jpg) repeat-x;
 	color:#555;
 	font-family:Verdana,"BitStream vera Sans",Tahoma,Helvetica,Sans-serif;
 	font-size:12px;
@@ -77,7 +77,7 @@ a:hover {
 	margin:0;
 }
 blockquote, pre {
-	background:#F4F5F7 url(img/blockquote.gif) 3px 3px no-repeat;
+	background:#F4F5F7 url(images/blockquote.gif) 3px 3px no-repeat;
 	border:1px dashed #CCC;
 	padding:8px 12px 8px 36px;
 	margin:5px 0;
@@ -119,14 +119,14 @@ blockquote, pre {
 }
 input.textfield, 
 textarea {
-	background:#FFF url(img/textfield.gif) top repeat-x;
+	background:#FFF url(images/textfield.gif) top repeat-x;
 	border:1px solid #A6A6A6;
 	padding:2px 1px;
 	font-size:12px;
 	font-family:Verdana,"BitStream vera Sans",Tahoma,Helvetica,Sans-serif;
 }
 .boxcaption {
-	background:#E3E4E6 url(img/box.gif) 0 0 no-repeat;
+	background:#E3E4E6 url(images/box.gif) 0 0 no-repeat;
 	padding:6px 12px;
 	border-bottom:1px solid #CCC;
 }
@@ -136,13 +136,13 @@ textarea {
 	letter-spacing:0em;
 }
 .box {
-	background:#F4F5F7 url(img/box.gif) 100% 100% no-repeat;
+	background:#F4F5F7 url(images/box.gif) 100% 100% no-repeat;
 	padding:8px 12px;
 	margin-bottom:10px;
 }
 .messagebox, 
 .errorbox {
-	background:#EDEFF0 url(img/messagebox.gif) no-repeat;
+	background:#EDEFF0 url(images/messagebox.gif) no-repeat;
 	padding:0 12px;
 	height:27px;
 	line-height:27px;
@@ -156,7 +156,7 @@ textarea {
 
 /* layout START */
 #wrap {
-	background:url(img/light.gif) center top no-repeat;
+	background:url(images/light.gif) center top no-repeat;
 	padding:20px 0;
 }
 #container {
@@ -167,7 +167,7 @@ textarea {
 
 /* header START */
 #header {
-	background:url(img/header.jpg) 0 0 no-repeat;
+	background:url(images/header.jpg) 0 0 no-repeat;
 	height:90px;
 	border-bottom:1px solid #A6A6A6;
 	overflow:hidden;
@@ -186,7 +186,7 @@ textarea {
 /* image blog title */
 /*
 #title a {
-	background:url(img/title.gif) no-repeat;
+	background:url(images/title.gif) no-repeat;
 	text-decoration:none;
 	color:#FFF;
 	width:250px;
@@ -220,7 +220,7 @@ textarea {
 	list-style:none;
 }
 #menus li a {
-	background:transparent url(img/menu.gif) no-repeat;
+	background:transparent url(images/menu.gif) no-repeat;
 	display:block;
 	color:#382E1F;
 	height:31px;
@@ -258,7 +258,7 @@ textarea {
 	cursor:default;
 }
 #searchbox {
-	background: url(img/searchbox.gif) no-repeat;
+	background: url(images/searchbox.gif) no-repeat;
 	width:209px;
 	height:21px;
 	display:block;
@@ -329,7 +329,7 @@ textarea {
 }
 #menus li li a.subtitle, 
 #menus li li a.subtitle:hover {
-	background-image:url(img/arrow.gif);
+	background-image:url(images/arrow.gif);
 	background-position:right;
 	background-repeat:no-repeat;
 }
@@ -337,14 +337,14 @@ textarea {
 
 /* content START */
 #content {
-	background:#FFF url(img/sidesep.gif) right repeat-y;
+	background:#FFF url(images/sidesep.gif) right repeat-y;
 	min-height:400px;
 }
 /* content END */
 
 /* main START */
 #main {
-	background:#FFF url(img/main_shadow.gif) top repeat-x;
+	background:#FFF url(images/main_shadow.gif) top repeat-x;
 	width:605px;
 	padding:13px 15px 15px;
 	float:left;
@@ -394,7 +394,7 @@ textarea {
 .post .addcomment, 
 .post .addlink, 
 .post .editlinks {
-	background:url(img/icons.gif) no-repeat;
+	background:url(images/icons.gif) no-repeat;
 	padding-left:22px;
 	height:16px;
 	line-height:16px;
@@ -403,7 +403,7 @@ textarea {
 }
 .post .tags, 
 .post .categories {
-	background:url(img/icons.gif) no-repeat;
+	background:url(images/icons.gif) no-repeat;
 	width:16px;
 	height:16px;
 	line-height:16px;
@@ -511,13 +511,13 @@ textarea {
 	background:#EDEFF0;
 }
 .post .content .boxcaption {
-	background-image:url(img/postbox.gif);
+	background-image:url(images/postbox.gif);
 }
 .post .content .box {
-	background-image:url(img/postbox.gif);
+	background-image:url(images/postbox.gif);
 }
 #postpath {
-	background:url(img/icons.gif) 0 -320px no-repeat;
+	background:url(images/icons.gif) 0 -320px no-repeat;
 	line-height:16px;
 	margin:5px 0;
 	padding-left:22px;
@@ -533,7 +533,7 @@ textarea {
 }
 #pagenavi .newer a, 
 #postnavi .prev a {
-	background:url(img/icons.gif) 0 -224px no-repeat;
+	background:url(images/icons.gif) 0 -224px no-repeat;
 	padding-left:22px;
 	float:left;
 	height:16px;
@@ -541,7 +541,7 @@ textarea {
 }
 #pagenavi .older a, 
 #postnavi .next a {
-	background:url(img/icons.gif) 100% -240px no-repeat;
+	background:url(images/icons.gif) 100% -240px no-repeat;
 	padding-right:22px;
 	float:right;
 	height:16px;
@@ -551,7 +551,7 @@ textarea {
 
 /* sidebar START */
 #sidebar {
-	background:#F7F7F7 url(img/sidebar_shadow.gif) top repeat-x;
+	background:#F7F7F7 url(images/sidebar_shadow.gif) top repeat-x;
 	width:300px;
 	float:right;
 	font-size:95%;
@@ -560,7 +560,7 @@ textarea {
 	padding-top:8px;
 }
 #sidebar li {
-	background:url(img/icons.gif) 0 -560px no-repeat;
+	background:url(images/icons.gif) 0 -560px no-repeat;
 	padding-left:22px;
 	list-style:none;
 	margin-top:5px;
@@ -573,7 +573,7 @@ textarea {
 #centersidebar, 
 #northsidebar .widget, 
 #southsidebar .widget {
-	background:url(img/widgetsep.png) bottom no-repeat;
+	background:url(images/widgetsep.png) bottom no-repeat;
 	padding:10px 15px 16px;
 }
 #centersidebar {
@@ -627,14 +627,14 @@ textarea {
 	font-size:11px;
 }
 #sidebar #feedrss {
-	background: url(img/feeds.gif) 5px 5px no-repeat;
+	background: url(images/feeds.gif) 5px 5px no-repeat;
 }
 #sidebar #feedemail {
-	background: url(img/feeds.gif) 5px -45px no-repeat;
+	background: url(images/feeds.gif) 5px -45px no-repeat;
 	margin-left:10px;
 }
 #sidebar #followme {
-	background: url(img/feeds.gif) 5px -95px no-repeat;
+	background: url(images/feeds.gif) 5px -95px no-repeat;
 	margin-left:10px;
 }
 #subscribe ul {
@@ -654,7 +654,7 @@ textarea {
 	display:block;
 }
 #subscribe li a span {
-	background:url(img/readers.gif) no-repeat;
+	background:url(images/readers.gif) no-repeat;
 	height:20px;
 	width:80px;
 	display:block;
@@ -701,7 +701,7 @@ textarea {
 
 /* footer START */
 #footer {
-	background:url(img/footer.jpg) 0 0 no-repeat;
+	background:url(images/footer.jpg) 0 0 no-repeat;
 	display:block;
 	height:88px;
 	border-top:1px solid #CCC;
@@ -720,7 +720,7 @@ textarea {
 	margin-left:20px;
 }
 a#powered {
-	background:url(img/wp-logo.png) no-repeat;
+	background:url(images/wp-logo.png) no-repeat;
 	display:block;
 	width:92px;
 	height:57px;
@@ -729,7 +729,7 @@ a#powered {
 	text-indent:-999em;
 }
 a#gotop {
-	background:url(img/icons.gif) 0 -304px no-repeat;
+	background:url(images/icons.gif) 0 -304px no-repeat;
 	float:right;
 	height:16px;
 	line-height:18px;
@@ -789,10 +789,10 @@ a#gotop {
 	margin-top:3px;
 }
 #cmtswitcher .addcomment {
-	background:url(img/icons.gif) 0 -112px no-repeat;
+	background:url(images/icons.gif) 0 -112px no-repeat;
 }
 #cmtswitcher .addtrackback {
-	background:url(img/icons.gif) 0 -144px no-repeat;
+	background:url(images/icons.gif) 0 -144px no-repeat;
 }
 #thecomments, 
 #thetrackbacks {
@@ -808,7 +808,7 @@ a#gotop {
 	text-align:center;
 }
 .comment .pic {
-	background:url(img/commentpoint.png) 100% 33% no-repeat;
+	background:url(images/commentpoint.png) 100% 33% no-repeat;
 	padding-right:14px;
 	margin-top:10px;
 }
@@ -823,7 +823,7 @@ a#gotop {
 	border:1px solid #999;
 }
 .comment .info {
-	background:#EDEFF0 url(img/comment.gif) 0 0 no-repeat;
+	background:#EDEFF0 url(images/comment.gif) 0 0 no-repeat;
 	float:left;
 	padding:10px 15px 0;
 	width:494px;
@@ -839,7 +839,7 @@ a#gotop {
 	font-size:10px;
 }
 .comment .content {
-	background:url(img/comment.gif) 100% 100% no-repeat;
+	background:url(images/comment.gif) 100% 100% no-repeat;
 	margin:0 -15px;
 	padding:0 15px 10px;
 	line-height:145%;
@@ -855,7 +855,7 @@ a#gotop {
 	float:right;
 }
 .admincomment .pic {
-	background:url(img/commentpoint.png) 0% 33% no-repeat;
+	background:url(images/commentpoint.png) 0% 33% no-repeat;
 	padding-right:0;
 	padding-left:14px;
 }
@@ -876,12 +876,12 @@ a#gotop {
 	margin-top:15px;
 }
 .trackback {
-	background:#EDEFF0 url(img/box.gif) 0 0 no-repeat;
+	background:#EDEFF0 url(images/box.gif) 0 0 no-repeat;
 	padding:10px 15px 0;
 	width:575px;
 }
 .trackback .title {
-	background:#EDEFF0 url(img/box.gif) 100% 100% no-repeat;
+	background:#EDEFF0 url(images/box.gif) 100% 100% no-repeat;
 	padding:10px 15px !important;
 	padding:0 15px 10px;
 	width:575px;
@@ -906,7 +906,7 @@ a#gotop {
 	width:601px;
 }
 #commentnavi {
-	background:#EDEFF0 url(img/box.gif) 0 0 no-repeat;
+	background:#EDEFF0 url(images/box.gif) 0 0 no-repeat;
 	padding:10px 15px;
 	font-size:11px;
 }
@@ -923,7 +923,7 @@ a#gotop {
 }
 #commentnavi span.pages {
 	padding:0 7px 0 22px;
-	background:url(img/icons.gif) 0 -272px no-repeat;
+	background:url(images/icons.gif) 0 -272px no-repeat;
 	height:16px;
 	line-height:16px;
 	float:left;
@@ -939,7 +939,7 @@ a#gotop {
 	line-height:16px;
 }
 #submitbox a.feed {
-	background:url(img/icons.gif) 0 -256px no-repeat;
+	background:url(images/icons.gif) 0 -256px no-repeat;
 	padding-left:22px;
 	height:16px;
 	line-height:16px;
@@ -1027,7 +1027,7 @@ a#gotop {
 	overflow:hidden;
 }
 .post .content .linkcat ul li a {
-	background:url(img/icons.gif) 0 -160px no-repeat;
+	background:url(images/icons.gif) 0 -160px no-repeat;
 	padding-left:22px;
 	height:16px;
 	line-height:16px;
@@ -1040,7 +1040,7 @@ a#gotop {
 	padding-bottom:10px;
 }
 #related_posts h3 {
-	background:#E3E4E6 url(img/box.gif) 0 0 no-repeat;
+	background:#E3E4E6 url(images/box.gif) 0 0 no-repeat;
 	font-size:12px;
 	padding:6px 12px;
 	font-family:Verdana,"BitStream vera Sans",Arial,Helvetica,Sans-serif;
@@ -1048,7 +1048,7 @@ a#gotop {
 	border-bottom:1px solid #CCC;
 }
 #related_posts ul {
-	background:#F4F5F7 url(img/box.gif) 100% 100% no-repeat;
+	background:#F4F5F7 url(images/box.gif) 100% 100% no-repeat;
 	padding:3px 12px 8px;
 }
 #related_posts ul li {
@@ -1099,7 +1099,7 @@ a#gotop {
 }
 .one-column .comment .info, 
 .one-column .comment .content {
-	background-image:url(img/comment_1col.gif);
+	background-image:url(images/comment_1col.gif);
 }
 .one-column .boxcaption, 
 .one-column .box, 
@@ -1108,15 +1108,15 @@ a#gotop {
 .one-column #commentnavi, 
 .one-column #related_posts h3, 
 .one-column #related_posts ul {
-	background-image:url(img/box_1col.gif);
+	background-image:url(images/box_1col.gif);
 }
 .one-column .messagebox, 
 .one-column .errorbox {
-	background-image:url(img/messagebox_1col.gif);
+	background-image:url(images/messagebox_1col.gif);
 }
 .one-column .post .content .boxcaption, 
 .one-column .post .content .box {
-	background-image:url(img/postbox_1col.gif);
+	background-image:url(images/postbox_1col.gif);
 }
 /* one-column END */
 
@@ -1164,7 +1164,7 @@ a#gotop {
 	padding-right:10px;
 }
 .twitter_reply {
-	background: url(img/icons.gif) 0 -112px no-repeat;
+	background: url(images/icons.gif) 0 -112px no-repeat;
 	padding-left:22px;
 	padding-right:10px;
 	height:16px;
