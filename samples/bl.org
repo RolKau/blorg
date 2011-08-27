@@ -1,0 +1,46 @@
+#+TITLE:		My little blog
+#+SUBTITLE:		Because nothing illustrates like an example
+#+AUTHOR:		John Doe
+#+EMAIL:		john.doe+blog@example.pri
+#+LANGUAGE:     en
+#+BLOG_URL:		http://example.pri/~johndoe
+#+PUBLISH_DIR:	~/public_html/blog/
+#+TEMPLATE:     ^/wp
+#+THEME:        ^/inove
+#+FEED_TYPE:	rss
+#-DISQUS:       johndoe
+
+# (1) Mark entries you want to published as DONE (using C-c C-t)
+# (2) Run `(require 'blorg)` in the "*scratch*" buffer (C-j)
+# (3) Run C-c " (or M-x blorg-publish) in this buffer
+
+* DONE First post 													   :blog:
+CLOSED: [2011-05-15 Sat 19:30]
+Hello, World!
+
+* TODO Thought about something interesting 							 :future:
+
+...but I'll rather write about it later
+
+* DONE How about some code? 										   :code:
+CLOSED: [2011-05-18 Wed 21:50]
+
+#+BEGIN_SRC elisp -n
+(print "Hello, World!")
+#+END_SRC
+
+* DONE <tags> are unnecessary 										   :blog:
+CLOSED: [2011-08-03 Wed 22:00]
+
+It is much *easier* and /faster/ to use symbols for formatting. 
+[[http://orgmode.org/manual/Hyperlinks.html#Hyperlinks][Links]] can also be put into the text this way.
+
+Local files will be copied to the output directory if put in double brackets.
+[[file:org-mode-unicorn.png]]
+
+* DONE Longer posts 												   :blog:
+CLOSED: [2011-08-15 Sat 19:00]
+
+The first paragraph is used as a synopsis of the post.
+
+Everything that is written after will only appear on the full page.
