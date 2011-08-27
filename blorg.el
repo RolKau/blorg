@@ -1,8 +1,9 @@
 ;;; blorg.el --- export a blog from an org file
 
-(defconst blorg-version "0.75e" "`blorg' version.")
+(defconst blorg-version "0.75e-rk0" "`blorg' version.")
 
-;; Copyright 2006 Bastien Guerry
+;; Copyright (c) 2006 Bastien Guerry
+;; Portions Copyright (c) 2011 Roland Kaufmann
 ;;
 ;; Author: Bastien Guerry <bzg AT altern DOT org>
 ;; Version: $Id: blorg.el,v 0.67 2008/01/29 14:08:13 guerry Exp guerry $
