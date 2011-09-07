@@ -1104,6 +1104,11 @@ Each element of the list is a cons: (\"tag-name\" . number)."
 			(car option))))))
 
 
+(defun blorg-sort-posts-by-date (a b)
+  "Function used to sort posts by date from older to recent."
+  (> (float-time (plist-get a :post-closed))
+     (float-time (plist-get b :post-closed))))
+
 (defun blorg-parse-content
   (blorgv-done-string reverse)
   "Parse blorgv-content of an `org-mode' buffer.
@@ -1137,6 +1142,7 @@ REVERSE posts order is necessary."
 			    (match-beginning 0)
 			  (point-max))) t)
 	  (setq cnt (1+ cnt)))))
+    (setq posts (sort posts 'blorg-sort-posts-by-date))
     (if reverse (reverse posts) posts)))
 
 
