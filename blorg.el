@@ -2009,9 +2009,6 @@ When FULL render full blorgv-content, otherwise just insert some headlines."
 				(blorg-rewrite-local-links)
 				(unless full
 				  (blorg-truncate-org-post blorgv-post-title))
-				(save-excursion
-				  (goto-char (point-min))
-				  (insert "*\n")) ; dummy item for this post
 				;; use externally defined stylesheet, not editor settings
 				(let ((org-export-htmlize-output-type 'css)
 					  (org-export-htmlize-css-font-prefix "code-"))
