@@ -1398,6 +1398,14 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST are required."
 	 (ins-echos (memq 'post blorg-put-echos-in-post))
 	 (ins-dates (memq 'post blorg-put-dates-in-post))
 	 (blorgv-ins-full (memq 'post blorg-put-full-post))
+	 ;; note: if (blorg-insert-previous-posts) is called on a single post
+	 ;; page, it will return items from the set of all the posts on the
+	 ;; blorg (like in blorg-render-index, but unlike blorg-render-tags-pages
+	 ;; and blorg-render-month-pages), since there is (currently) no way of
+	 ;; knowing from which overview page the link to this page came from.
+	 (previous-posts (blorg-limit-content-to-number
+					  blorgv-content
+					  (cdr (assoc 'index blorg-post-number-per-page)) t))
 	 (post-keywords blorgv-keywords))
     (dolist (ctnt0 blorgv-content)
       (let* ((ctnt (list ctnt0))
