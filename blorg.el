@@ -1361,9 +1361,9 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST are required."
       (let* ((ctnt (blorg-limit-content-to-number 
 		    blorgv-content 
 		    (cdr (assoc 'index blorg-post-number-per-page))))
-	     (previous-posts (blorg-limit-content-to-number 
-			      blorgv-content 
-			      (cdr (assoc 'index blorg-post-number-per-page)) t))
+	     (previous-posts (reverse (blorg-limit-content-to-number 
+				       blorgv-content 
+				       (cdr (assoc 'index blorg-post-number-per-page)) t)))
 	     (ins-tags (memq 'index blorg-put-tags-in-post))
 	     (ins-auth (memq 'index blorg-put-author-in-post))
 	     (ins-echos (memq 'index blorg-put-echos-in-post))
@@ -1388,9 +1388,9 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST are required."
 	 (ins-echos (memq 'post blorg-put-echos-in-post))
 	 (ins-dates (memq 'post blorg-put-dates-in-post))
 	 (blorgv-ins-full (memq 'post blorg-put-full-post))
-	 (previous-posts (blorg-limit-content-to-number
+	 (previous-posts (reverse (blorg-limit-content-to-number
 			  blorgv-content
-			  (cdr (assoc 'index blorg-post-number-per-page)) t))
+			  (cdr (assoc 'index blorg-post-number-per-page)) t)))
 	 (post-keywords blorgv-keywords))
     (dolist (ctnt0 blorgv-content)
       (let* ((ctnt (list ctnt0))
@@ -1442,8 +1442,8 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST  are required."
 	     (ctnt (blorg-limit-content-to-number 
 		    ctnt-tag 
 		    (cdr (assoc 'tag blorg-post-number-per-page))))
-	     (previous-posts (blorg-limit-content-to-number 
-			      ctnt-tag (cdr (assoc 'tag blorg-post-number-per-page)) t)))
+	     (previous-posts (reverse (blorg-limit-content-to-number 
+				       ctnt-tag (cdr (assoc 'tag blorg-post-number-per-page)) t))))
 	(with-temp-buffer
 	  (switch-to-buffer (get-buffer-create "*blorg output*"))
 	  (erase-buffer)
@@ -1492,8 +1492,8 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST are required."
 	     (ctnt-month (blorg-limit-content-to-month blorgv-content month))
  	     (ctnt (blorg-limit-content-to-number 
 		    ctnt-month (cdr (assoc 'month blorg-post-number-per-page))))
- 	     (previous-posts (blorg-limit-content-to-number 
-			      ctnt-month (cdr (assoc 'month blorg-post-number-per-page)) t)))
+ 	     (previous-posts (reverse (blorg-limit-content-to-number 
+				       ctnt-month (cdr (assoc 'month blorg-post-number-per-page)) t))))
 	(with-temp-buffer
 	  (switch-to-buffer (get-buffer-create "*blorg output*"))
 	  (erase-buffer)
