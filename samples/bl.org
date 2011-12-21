@@ -1,3 +1,4 @@
+# -*- mode: org; mode: visible -*-
 #+TITLE:		My little blog
 #+SUBTITLE:		Because nothing illustrates like an example
 #+AUTHOR:		John Doe
