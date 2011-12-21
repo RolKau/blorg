@@ -865,6 +865,19 @@ Each cell in this list is a list of the form:
 			(set (intern templ-var) (buffer-string))
 			(message "Loaded %s from \"%s\"" templ-var templ-file)))))))
 
+(defun blorg-post-comparator (a b)
+  "Determine if a post should appear before another"
+  (funcall (if blorg-reverse-posts-order '> '<)
+   (float-time (plist-get a :post-closed))
+   (float-time (plist-get b :post-closed))))
+
+(defun blorg-sort-posts (posts)
+  "Sort posts by date"
+  ;; use a local copy to avoid any side-effects by destructive update
+  (let ((list-of-posts posts))
+	(setq list-of-posts (sort list-of-posts 'blorg-post-comparator))
+	list-of-posts))
+
 ;;;###autoload
 (defun blorg-publish ()
   "Publish an `org-mode' file as a blog."
@@ -874,9 +887,8 @@ Each cell in this list is a list of the form:
   (blorg-set-time-formats)
   (blorg-set-header-vars)
   (run-hooks 'blorg-before-publish-hook)
-  (let* ((blorgv-content (blorg-parse-content 
-			 blorgv-done-string 
-			 blorg-reverse-posts-order))
+  (let* ((blorgv-content (blorg-sort-posts (blorg-parse-content 
+			 blorgv-done-string)))
 	 (tags (blorg-parse-tags))
 	 (blorgv-tagstotal (blorg-count-tags-total tags))
 	 (blorgv-tagsaverage (if tags (/ blorgv-tagstotal (length tags)) 1))
@@ -1104,11 +1116,9 @@ Each element of the list is a cons: (\"tag-name\" . number)."
 			(car option))))))
 
 
-(defun blorg-parse-content
-  (blorgv-done-string reverse)
+(defun blorg-parse-content (blorgv-done-string)
   "Parse blorgv-content of an `org-mode' buffer.
-Check the presence of BLORGV-DONE-STRING in each post.
-REVERSE posts order is necessary."
+Check the presence of BLORGV-DONE-STRING in each post."
   (let (posts (cnt 0))
     (save-excursion
       (goto-char (point-min))
@@ -1137,7 +1147,7 @@ REVERSE posts order is necessary."
 			    (match-beginning 0)
 			  (point-max))) t)
 	  (setq cnt (1+ cnt)))))
-    (if reverse (reverse posts) posts)))
+	  posts))
 
 
 (defun blorg-parse-post (number title tags dte end)
