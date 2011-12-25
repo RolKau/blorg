@@ -1444,7 +1444,7 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST  are required."
       (let* ((tag-name (car tag))
 	     (file-name (concat blorgv-publish-d
 							(plist-get blorg-strings :tags-dir)
-							tag-name 
+							(downcase tag-name)
 							(plist-get blorg-strings :page-extension)))
 	     (ins-tags (memq 'tag blorg-put-tags-in-post))
 	     (ins-auth (memq 'tag blorg-put-author-in-post))
@@ -1476,7 +1476,7 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST  are required."
 			(blorg-render-tag-feed
 			 tag-name ctnt
 			 (concat (plist-get blorg-strings :tags-dir)
-					 tag-name (plist-get blorg-strings :feed-extension)))))))))
+					 (downcase tag-name) (plist-get blorg-strings :feed-extension)))))))))
 
 
 (defun blorg-make-path (file-name)
