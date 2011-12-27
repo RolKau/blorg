@@ -1989,19 +1989,58 @@ TAG is the set of tags."
 			  blorg-special-html-chars))
 	text))
 
+;; expression that matches start and end of blocks
+;; (taken from org-export-blocks-preprocess in org-exp-blocks.el)
+(defconst blorg-block-re "^[ \t]*#\\+\\(begin\\|end\\)_.*$")
+
+(defun blorg-truncate-incomplete-blocks ()
+  "Remove blocks that have been truncated due to length limitations"
+  (let ((from-point)
+		(case-fold-search t)
+		(balanced 0))
+	(save-excursion
+	  (goto-char (point-min))
+	  ;; process all top-level blocks
+	  (while (re-search-forward blorg-block-re nil t)
+		;; note where the current block started
+		(setq from-point (point))
+		(setq balanced 1)
+		;; search for nested blocks
+		(while (and (not (zerop balanced))
+					(re-search-forward blorg-block-re nil t))
+		  ;; increase depth count if we find blocks
+		  (if (string= (downcase (match-string 1)) "end")
+			  (setq balanced (1- balanced))
+			(setq balanced (1+ balanced)))))
+	  ;; if we didn't find any block end, it was because the buffer ended
+	  (if (not (zerop balanced))
+		  (from-point)
+		(point-max)))))
+
 (defun blorg-truncate-org-post (blorgv-post-title)
   "Truncates the current buffer after the blorg-parg-in-headlines-th paragraph,
 and adds a read-mode link."
+  ;; keep the number of paragraphs specified
   (goto-char (point-min))
   (forward-paragraph blorg-parg-in-headlines)
+  ;; block end is not considered part of the paragraph
+  (when (looking-at blorg-block-re)
+	(forward-line 1)
+	(when (eq (point) (point-max))
+	  (insert "\n")))
+  ;; if rest of post is just whitespace, then put in "read more" link
   (delete-blank-lines)
-  (unless (eq (point) (point-max))
-    (insert "\n[[" blorgv-base-href
-            (blorg-make-post-url post)
-            "]["
-            (plist-get blorg-strings :read-more)
-            "]]"))
-  (delete-region (point) (point-max)))
+  ;; if we didn't reach the end of the buffer, insert a continuation
+  (when (not (eq (point) (point-max)))
+	;; remove any block that were truncated halfway thru, otherwise everything
+	;; that was after the specified number of paragraphs
+	(delete-region (min (blorg-truncate-incomplete-blocks) (point)) (point-max))
+	;; links to the full story
+	(insert "\n[[" blorgv-base-href
+			(blorg-make-post-url post)
+			"]["
+			(plist-get blorg-strings :read-more)
+			"]]")))
 
 (defun blorg-render-post-content-html
   (blorgv-content full blorgv-post-title)
