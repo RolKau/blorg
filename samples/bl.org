@@ -10,6 +10,7 @@
 #+THEME:        ^/inove
 #+FEED_TYPE:	rss
 #-DISQUS:       johndoe
+#+OPTIONS:      H:2
 
 # (1) Mark entries you want to published as DONE (using C-c C-t)
 # (2) Run `(require 'blorg)` in the "*scratch*" buffer (C-j)
@@ -45,3 +46,4 @@ CLOSED: [2011-08-15 Sat 19:00]
 The first paragraph is used as a synopsis of the post.
 
 Everything that is written after will only appear on the full page.
+*** Bullets must by default be preceeded by three stars (H:2+1)

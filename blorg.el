@@ -95,6 +95,8 @@
 ;; Optional keys:
 ;; #+DISQUS      : active Disqus threads and set identifier for the site
 ;;                 (shortname at <http://disqus.com/admin/register/>)
+;; #+OPTIONS     : options for HTML export, currently only H:n to set
+;;                 n levels of headlines
 ;; 
 ;; See M-x `customize-group' RET `blorg' for further details.
 ;;
@@ -212,6 +214,7 @@
     (:upload-dir "^#\\+UPLOAD_DIR:[ \t]+\\(.+\\)$")
     (:images-dir "^#\\+IMAGES_DIR:[ \t]+\\(.+\\)$")
 	(:disqus-id "^#\\+DISQUS:[ \t]+\\(.+\\)$")
+	(:html-opts "^#\\+OPTIONS:[ \t]+\\(.+\\)$")
     (:config-file "^#\\+CONFIG_FILE:[ \t]+\\(.+\\)$"))
     "Alist of options and matching regexps.")
 
@@ -307,6 +310,7 @@
 	:template-dir nil
 	:theme-dir nil
 	:disqus-id nil
+	:html-opts ""
     :upload-dir "upload/"
     :images-dir "images/")
   "A list of default options.
@@ -820,6 +824,7 @@ Each cell in this list is a list of the form:
 	blorgv-images-d (plist-get blorgv-header :images-dir)
 	blorgv-keywords (plist-get blorgv-header :keywords)
 	blorgv-disqus-id (plist-get blorgv-header :disqus-id)
+	blorgv-html-opts (plist-get blorgv-header :html-opts)
 	blorgv-feed-type (plist-get blorgv-header :feed-type)))
 
 (defun blorg-set-time-formats nil
@@ -2047,7 +2052,8 @@ and adds a read-mode link."
   "Render BLORGV-CONTENT of a post.
 When FULL render full blorgv-content, otherwise just insert some headlines."
   (with-temp-buffer
-		(let ((out-buf (buffer-name)))
+		(let ((out-buf (buffer-name))
+			  (p '(:headline-levels 2))) ; html export defaults
 		  (unwind-protect
 			  (with-temp-buffer
 				(unless (eq major-mode 'org-mode)
@@ -2057,10 +2063,13 @@ When FULL render full blorgv-content, otherwise just insert some headlines."
 				(blorg-rewrite-local-links)
 				(unless full
 				  (blorg-truncate-org-post blorgv-post-title))
+				;; parse headline options from file
+				(org-export-add-options-to-plist p blorgv-html-opts)
 				;; use externally defined stylesheet, not editor settings
 				(let ((org-export-htmlize-output-type 'css)
-					  (org-export-htmlize-css-font-prefix "code-"))
-				  (org-export-as-html 3 nil nil out-buf t)))))
+					  (org-export-htmlize-css-font-prefix "code-")
+					  (hdlns (plist-get p :headline-levels)))
+				  (org-export-as-html hdlns nil nil out-buf t)))))
 		(buffer-string)))
 
 (defun blorg-rewrite-local-links ()
