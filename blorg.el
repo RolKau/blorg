@@ -1,6 +1,6 @@
 ;;; blorg.el --- export a blog from an org file
 
-(defconst blorg-version "0.75e-rk0" "`blorg' version.")
+(defconst blorg-version "0.75e-rk1" "`blorg' version.")
 
 ;; Copyright (c) 2006 Bastien Guerry
 ;; Portions Copyright (c) 2011 Roland Kaufmann
