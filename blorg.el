@@ -1698,27 +1698,26 @@ TAG is the set of tags."
   (replace-regexp-in-string "[ \t]+$" "" string))
 
 
-(defun blorg-split-template (tpl)
-  "Split TPL into a list of functions."
-  (let* ((lst (split-string tpl "[\(\)]"))
-	 (cnt 0))
-    (dotimes (cnt (length lst))
-      (when (fboundp (intern-soft (nth cnt lst)))
-	(setf (nth cnt lst)
-	      (intern-soft (nth cnt lst))))
-	  (when (equal "" (nth cnt lst)) ; restore set of parenthesis in source
-		(setf (nth cnt lst) "()")))
-	lst))
+(defun blorg-replace-template-vars-1 (match)
+  ;; get name of function by disregarding surrounding parenthesis in form
+  (let* ((fn-name (substring match 1 (1- (length match))))
+		 (fn-sym (intern-soft fn-name)))
+	;; if it was the name of a valid function, evaluate it in a temp.
+	;; buffer and replace match with the resulting string
+	(if (fboundp fn-sym)
+		(save-match-data
+		  (with-temp-buffer
+			(eval (macroexpand `(,fn-sym)))
+			(buffer-substring-no-properties (buffer-end 0) (buffer-end 1))))
+	  match)))
 
 
 (defun blorg-insert-body (tpl)
   "Insert body of TPL."
-  (mapc (lambda (func) (eval func))
-	(mapcar (lambda (part)
-		  (if (stringp part)
-		      (list 'insert part)
-		    (macroexpand `(,part))))
-		(blorg-split-template tpl))))
+  ;; run helper function on everything that looks like a Lisp form
+  (insert (replace-regexp-in-string "(\\([A-Za-z0-9-]*\\))"
+                                    'blorg-replace-template-vars-1
+                                    tpl t t)))
 
 
 (defun blorg-sort-content-tag (blorgv-content tag-name)
