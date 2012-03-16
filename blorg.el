@@ -1130,7 +1130,7 @@ Check the presence of BLORGV-DONE-STRING in each post."
       ;; match DONE and [#A] DONE as well
       (while (re-search-forward
 	      (concat "^\\* " blorgv-done-string
-		      " \\([^:\r\n]+\\)[ \t]*\\(:[A-Za-z@_0-9:]+\\)?[ \t]*$")
+		      " \\(.+?\\)[ \t]*\\(:[A-Za-z@_0-9:]+\\)?[ \t]*$")
 	      nil t)
 	(let* ((ttle (match-string-no-properties 1))
 	       (tgs (or (match-string-no-properties 2) ""))
