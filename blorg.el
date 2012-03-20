@@ -471,6 +471,7 @@ Here is a list of defuns you can use in this template:
 	</div>
   </div>
 </body>
+</html>
 "
   "Template of the index page.
 
@@ -540,6 +541,7 @@ Here is the list of defuns that you can insert in this template:
 	</div>
   </div>
 </body>
+</html>
 "
   "Template for the tag pages.
 
@@ -609,6 +611,7 @@ Here is the list of defuns that you can insert in this template:
 	</div>
   </div>
 </body>
+</html>
 "
   "Template for the month pages.
 
@@ -641,6 +644,7 @@ Here is the list of defuns that you can insert in this template:
 	(blorg-insert-content)
   </div>
 </body>
+</html>
 "
   "Template for the post pages.
 
@@ -1390,7 +1394,6 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST are required."
 							(plist-get blorg-strings :index-page-name)
 							(plist-get blorg-strings :page-extension))))
 	(blorg-insert-body blorg-index-template)
-	(insert "\n</html>\n")
 	(blorg-write-file file-name)
 	(kill-buffer (buffer-name))))))
 
@@ -1435,7 +1438,6 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST are required."
 	   blorgv-header (plist-get blorgv-header :tp-title) t)
 	 ;; Render body
 	  (blorg-insert-body blorg-post-page-template)
-	  (insert "\n</html>\n")
 	  (blorg-write-file post-file-name)
 	  (kill-buffer (buffer-name))))))))
 
@@ -1473,7 +1475,6 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST  are required."
 			  tag-name) nil
 	   (concat tag-name (plist-get blorg-strings :feed-extension)) tag)
 	  (blorg-insert-body blorg-tag-page-template)
-	  (insert "\n</html>\n")
 	  (blorg-write-file file-name)
 	  (kill-buffer (buffer-name)))
 	(when (memq 'tag blorg-publish-feed)
@@ -1522,7 +1523,6 @@ BLORGV-HEADER TAGS BLORGV-CONTENT and MONTHS-LIST are required."
 			  (plist-get blorg-strings :title-separator)
 			  month-name) nil)
 	  (blorg-insert-body blorg-month-page-template)
-	  (insert "\n</html>\n")
 	  (blorg-write-file file-name)
 	  (kill-buffer (buffer-name)))))))
 
