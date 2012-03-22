@@ -1654,10 +1654,16 @@ TAG is the set of tags."
   "Helper routine to format a title into an URL."
   (with-temp-buffer
     (insert blorgv-post-title)
+	;; replace national characters with closest ASCII character
+	(format-replace-strings '(("\x00E9" . "e")("\x00C9" . "E") ; acute
+							  ("\x00E8" . "e")("\x00C8" . "E") ; grave
+							  ("\x00E0" . "a")("\x00C0" . "A") ; grave
+							  ("\x00F4" . "o")("\x00D4" . "O") ; circumflex
+							  ("\x00EF" . "i")("\x00CF" . "I") ; diaeresis
+							  ("\x00F9" . "u")("\x00D9" . "U"))) ; grave
     (goto-char (point-min))
     (while (< (point) (point-max))
-      (cond ((member (char-after) '(233 232 224 244 239 249))
-	     (progn (delete-char 1)))
+      (cond
 	    ((member (char-after) '(?  ?\' ?/ ?% ?# ?= ?+))
 	     (progn (delete-char 1) (insert "-")))
 	    ((member (char-after)
