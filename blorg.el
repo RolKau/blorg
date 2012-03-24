@@ -123,7 +123,6 @@
 
 
 ;;; Requirements
-(provide 'blorg)
 
 (require 'org)
 (require 'calendar)
@@ -2270,6 +2269,8 @@ Example: 2011-12-31 13:59"
 		  (string-to-number (match-string 6 timestamp)) 0)))
       (encode-time 0 min hour day month year)))))
 
+
+(provide 'blorg)
 
 
 ;;;;##########################################################################
