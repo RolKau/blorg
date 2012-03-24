@@ -1121,6 +1121,7 @@ Check the presence of BLORGV-DONE-STRING in each post."
          (title (org-get-heading t t))
          (props (org-entry-properties))
          (tags (cdr (assoc-string "TAGS" props)))
+         (tag-list (org-get-tags))
          (closed (cdr (assoc-string "CLOSED" props))))
     (save-restriction
       (org-narrow-to-subtree)
@@ -1128,6 +1129,7 @@ Check the presence of BLORGV-DONE-STRING in each post."
       (list :post-number (incf cnt)
             :post-title title
             :post-tags (or tags "")
+            :post-tag-list tag-list
             :post-closed (if closed (org-time-string-to-time closed) (current-time))
             :post-updated (current-time)
             :post-content (buffer-substring (point) (point-max))))))
@@ -1495,7 +1497,7 @@ TAG-NAME BLORGV-HEADER BLORGV-CONTENT and FEED-NAME are required."
   (with-temp-buffer
     (switch-to-buffer (get-buffer-create "*blorg feed output*"))
     (erase-buffer)
-    (let ((new-con (blorg-sort-content-tag blorgv-content tag-name))
+    (let ((new-con (blorg-limit-content-to-tag blorgv-content tag-name))
 	  (new-tit (concat blorgv-blog-title 
 			   (plist-get blorg-strings :title-separator)
 			   tag-name)))
@@ -1631,12 +1633,9 @@ TAG is the set of tags."
 
 (defun blorg-limit-content-to-tag (blorgv-content tag-name)
   "Limit BLORGV-CONTENT to posts with TAG-NAME."
-  (delq nil
-	(mapcar (lambda (post)
-		  (when (string-match
-			 (regexp-quote tag-name)
-			 (plist-get post :post-tags))
-		    post)) blorgv-content)))
+  (remove-if-not (lambda (tags) (member tag-name tags))
+                 blorgv-content
+                 :key (lambda (post) (plist-get post :post-tag-list))))
 
 
 (defun blorg-strip-trailing-spaces (string)
@@ -1664,18 +1663,6 @@ TAG is the set of tags."
   (insert (replace-regexp-in-string "(\\([A-Za-z0-9-]*\\))"
                                     'blorg-replace-template-vars-1
                                     tpl t t)))
-
-
-(defun blorg-sort-content-tag (blorgv-content tag-name)
-  "Remove posts from BLORGV-CONTENT if they don't match TAG-NAME."
-  (delq nil
-	(mapcar
-	 '(lambda (post)
-	    (when (string-match
-		   (regexp-quote tag-name)
-		   (plist-get post :post-tags))
-	      post))
-	 blorgv-content)))
 
 
 (defun blorg-make-keywords-links (tags &optional site cloud)
