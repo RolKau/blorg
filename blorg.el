@@ -1058,29 +1058,14 @@ Each cell in this list is a list of the form:
 (defun blorg-parse-tags ()
   "Make a sorted list of all tags from buffer.
 Each element of the list is a cons: (\"tag-name\" . number)."
-  (let (alltags)
-    (save-excursion
-      (goto-char (point-min))
-      (while (re-search-forward ":\\([0-9A-Za-z@_]+\\):" nil t)
-		  (when (blorg-check-done)
-	(unless (assoc (match-string-no-properties 1) alltags)
-	  (let ((cnt 0))
-	    (save-excursion
-	      (goto-char (point-min))
-	      (while (re-search-forward
-			   (concat ":\\("
-				   (regexp-quote
-				    (match-string-no-properties 1))
-				   "\\):") nil t)
-			  (when (blorg-check-done)
-		(setq cnt (1+ cnt)))))
-	    (setq alltags
-		  (add-to-list
-		   'alltags
-		   (cons (match-string-no-properties 1)
-			 cnt))))))
-	(backward-char 1)))
-    (blorg-sort-tags alltags blorg-tags-sort)))
+  (let* ((all-tags (org-map-entries 'org-get-tags
+                                    (concat "+LEVEL=1/!" blorgv-done-string)))
+         (all-tags (apply 'nconc all-tags))
+         (unique-tags (org-uniquify all-tags)))
+    (mapcar 'blorg-parse-tags-1 unique-tags)))
+
+(defun blorg-parse-tags-1 (tag)
+  (cons tag (org-count tag all-tags)))
 
 
 (defun blorg-parse-header nil
@@ -1127,69 +1112,25 @@ Each element of the list is a cons: (\"tag-name\" . number)."
 (defun blorg-parse-content (blorgv-done-string)
   "Parse blorgv-content of an `org-mode' buffer.
 Check the presence of BLORGV-DONE-STRING in each post."
-  (let (posts (cnt 0))
-    (save-excursion
-      (goto-char (point-min))
-      ;; match DONE and [#A] DONE as well
-      (while (re-search-forward
-	      (concat "^\\* " blorgv-done-string
-		      " \\(.+?\\)[ \t]*\\(:[A-Za-z@_0-9:]+\\)?[ \t]*$")
-	      nil t)
-	(let* ((ttle (match-string-no-properties 1))
-	       (tgs (or (match-string-no-properties 2) ""))
-	       (dte (blorg-encode-time
-		     (or (progn
-			   (save-excursion
-			     (re-search-forward
-			      org-ts-regexp-both 
-			      (save-excursion
-				(re-search-forward "^\\* " nil t)) t))
-			   (match-string-no-properties 1))
-			 (format-time-string (cdr blorgv-time-stamp-formats)))
-			 t)))
-	  (add-to-list 'posts
-		       (blorg-parse-post
-			cnt ttle tgs dte
-			(if (save-excursion
-			      (re-search-forward "^\\* " nil t))
-			    (match-beginning 0)
-			  (point-max))) t)
-	  (setq cnt (1+ cnt)))))
-	  posts))
+  (let ((cnt -1))
+    (org-map-entries 'blorg-parse-content-1
+                     (concat "+LEVEL=1/!" blorgv-done-string))))
 
-
-(defun blorg-parse-post (number title tags dte end)
-  "Parse post NUMBER with TITLE and TAGS from DATE ending at END."
-  `(:post-number ,number
-    :post-title ,(blorg-strip-trailing-spaces title)
-    :post-tags ,tags
-    :post-closed ,dte
-    :post-updated ,(current-time)
-    :post-content ,(blorg-get-post-content end)))
-
-
-(defun blorg-get-post-content (end)
-  "Get the blorgv-content of the post before END."
-  (save-excursion
-    (beginning-of-line)
-    (while (or (looking-at (concat "[ \t]*" org-closed-string " "))
-	       (looking-at (concat "[ \t]*" org-scheduled-string " "))
-	       (looking-at "\\* "))
-      (forward-line 1))
-    (buffer-substring (point) end)))
-
-
-(defun blorg-check-done ()
-  "Check if the line begins with the DONE string.
-Also match \"* DONE [#A] ...\" and the likes."
-  (save-excursion
-    (save-match-data
-      (beginning-of-line)
-      (looking-at
-       (concat 
-	"^\\*.+"
-	(or (plist-get blorgv-header :done-string) "DONE"))))))
-;;	    (car (reverse (split-string (plist-get blorgv-header :seq-todo))))))))))
+(defun blorg-parse-content-1 ()
+  (let* ((org-trust-scanner-tags t)
+         (title (org-get-heading t t))
+         (props (org-entry-properties))
+         (tags (cdr (assoc-string "TAGS" props)))
+         (closed (cdr (assoc-string "CLOSED" props))))
+    (save-restriction
+      (org-narrow-to-subtree)
+      (org-end-of-meta-data-and-drawers)
+      (list :post-number (incf cnt)
+            :post-title title
+            :post-tags (or tags "")
+            :post-closed (if closed (org-time-string-to-time closed) (current-time))
+            :post-updated (current-time)
+            :post-content (buffer-substring (point) (point-max))))))
 
 
 (defun blorg-limit-content-to-number (lst num &optional rest)
@@ -2255,21 +2196,6 @@ Example: Sunday, May 07 2006 @ 10:35 +0100"
   "Convert an `org-mode` TIMESTAMP to ISO-8601 format.
 Example: 2011-12-31 13:59"
   (format-time-string "%Y-%m-%d %H:%M" time))
-
-(defun blorg-encode-time (timestamp &optional incl-time)
-  "Encode TIMESTAMP."
-  (let ((format (concat "\\([0-9]+\\)-\\([0-9]+\\)-\\([0-9]+\\)"
-						(if incl-time
-							 " \\(.*?\\) \\([0-9]+\\):\\([0-9]+\\)"))))				  
-  (when (string-match format timestamp)
-    (let ((year (string-to-number (match-string 1 timestamp)))
-	  (month (string-to-number (match-string 2 timestamp)))
-	  (day (string-to-number (match-string 3 timestamp)))
-	  (hour (if (match-string 5 timestamp)
-		  (string-to-number (match-string 5 timestamp)) 0))
-	  (min (if (match-string 6 timestamp)
-		  (string-to-number (match-string 6 timestamp)) 0)))
-      (encode-time 0 min hour day month year)))))
 
 
 (provide 'blorg)
