@@ -2159,7 +2159,9 @@ be the target directory, i.e. renames are not supported."
 (defun blorg-trim-leading-and-trailing-lines ()
   (save-excursion
 	(goto-char (point-min))
-	(delete-blank-lines)
+	;; avoid deleting second, blank line when the post starts with a non-blank
+	(when (looking-at "[ \t]*$")
+	  (delete-blank-lines))
 	(goto-char (point-max))
 	(delete-blank-lines)))
 
